@@ -114,7 +114,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes.A
                     return null;
                 }
 
-                if (id.StartsWith(projectFolder, StringComparison.OrdinalIgnoreCase))
+                if (id.StartsWith(projectFolder, StringComparisons.Paths))
                 {
                     int startIndex = projectFolder.Length;
 
