@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel.Composition;
-using System.Linq;
 
 using Microsoft.VisualStudio.ProjectSystem.VS.Extensibility;
 using Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.CrossTarget;
@@ -137,9 +136,19 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
         }
 
         /// <inheritdoc />
-        public IReadOnlyCollection<IDependenciesSnapshot> GetSnapshots()
+        public ImmutableArray<IDependenciesSnapshot> GetSnapshots()
         {
-            return _snapshotProviderByProjectPath.Values.Select(p => p.CurrentSnapshot).ToList();
+            // Copy reference to immutable collection for consistency within this method
+            ImmutableDictionary<string, IDependenciesSnapshotProvider> dic = _snapshotProviderByProjectPath;
+
+            ImmutableArray<IDependenciesSnapshot>.Builder builder = ImmutableArray.CreateBuilder<IDependenciesSnapshot>(dic.Count);
+
+            foreach ((string _, IDependenciesSnapshotProvider provider) in dic)
+            {
+                builder.Add(provider.CurrentSnapshot);
+            }
+
+            return builder.MoveToImmutable();
         }
     }
 }

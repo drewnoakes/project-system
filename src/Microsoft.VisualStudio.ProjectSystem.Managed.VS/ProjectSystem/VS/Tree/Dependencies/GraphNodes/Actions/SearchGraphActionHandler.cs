@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.ComponentModel.Composition;
 
 using Microsoft.VisualStudio.GraphModel;
@@ -63,7 +64,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes.A
             var cachedDependencyToMatchingResultsMap = new Dictionary<string, HashSet<IDependency>>(StringComparer.OrdinalIgnoreCase);
             var searchResultsPerContext = new Dictionary<string, HashSet<IDependency>>(StringComparer.OrdinalIgnoreCase);
 
-            System.Collections.Generic.IReadOnlyCollection<IDependenciesSnapshot> snapshots = AggregateSnapshotProvider.GetSnapshots();
+            ImmutableArray<IDependenciesSnapshot> snapshots = AggregateSnapshotProvider.GetSnapshots();
 
             foreach (IDependenciesSnapshot snapshot in snapshots)
             {

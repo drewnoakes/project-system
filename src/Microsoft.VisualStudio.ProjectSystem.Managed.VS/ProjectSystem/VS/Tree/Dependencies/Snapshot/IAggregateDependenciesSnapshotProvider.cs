@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
 {
@@ -35,7 +35,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
         /// Gets the current snapshot from every registered project.
         /// </summary>
         /// <returns>A collection of <see cref="IDependenciesSnapshot"/>. Will not contain <see langword="null"/> values.</returns>
-        IReadOnlyCollection<IDependenciesSnapshot> GetSnapshots();
+        ImmutableArray<IDependenciesSnapshot> GetSnapshots();
 
         /// <summary>
         /// Fired when a snapshot changed in a snapshot provider.
