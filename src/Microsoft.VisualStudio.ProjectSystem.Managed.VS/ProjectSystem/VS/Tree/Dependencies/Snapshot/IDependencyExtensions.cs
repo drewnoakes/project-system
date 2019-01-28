@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information.
 
-using System;
 using System.Collections.Immutable;
 
 using Microsoft.VisualStudio.Imaging.Interop;
@@ -68,16 +67,6 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
             return string.IsNullOrEmpty(self.Path)
                 ? self.Id
                 : Dependency.GetID(self.TargetFramework, self.ProviderType, self.Path);
-        }
-
-        /// <summary>
-        /// Returns id having full path instead of OriginalItemSpec
-        /// </summary>
-        public static bool TopLevelIdEquals(this IDependency self, string id)
-        {
-            return string.IsNullOrEmpty(self.Path)
-                ? string.Equals(self.Id, id, StringComparison.OrdinalIgnoreCase)
-                : Dependency.IdEquals(id, self.TargetFramework, self.ProviderType, self.Path);
         }
 
         /// <summary>

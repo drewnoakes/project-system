@@ -194,7 +194,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
                 foreach ((ITargetFramework _, ITargetedDependenciesSnapshot targetedDependencies) in Targets)
                 {
                     IDependency dependency = targetedDependencies.TopLevelDependencies
-                        .FirstOrDefault((x, id) => x.TopLevelIdEquals(id), dependencyId);
+                        .FirstOrDefault(TopLevelIdEquals, dependencyId);
 
                     if (dependency != null)
                     {
@@ -212,6 +212,13 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
             }
 
             return null;
+
+            bool TopLevelIdEquals(IDependency dependency, string id)
+            {
+                return string.IsNullOrEmpty(dependency.Path)
+                    ? string.Equals(dependency.Id, id, StringComparison.OrdinalIgnoreCase)
+                    : Dependency.IdEquals(id, dependency.TargetFramework, dependency.ProviderType, dependency.Path);
+            }
         }
 
         /// <inheritdoc />
