@@ -14,7 +14,6 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
             Xunit.Assert.Equal(actual.Caption, expected.Caption);
             Xunit.Assert.Equal(actual.OriginalItemSpec, expected.OriginalItemSpec);
             Xunit.Assert.Equal(actual.Path, expected.Path);
-            Xunit.Assert.Equal(actual.FullPath, expected.FullPath);
             Xunit.Assert.Equal(actual.SchemaName, expected.SchemaName);
             Xunit.Assert.Equal(actual.SchemaItemType, expected.SchemaItemType);
             Xunit.Assert.Equal(actual.Resolved, expected.Resolved);

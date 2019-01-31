@@ -50,7 +50,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes.V
 
         public override void BuildGraph(
             IGraphContext graphContext,
-            string projectPath,
+            IProjectIdentity projectId,
             IDependency dependency,
             GraphNode dependencyGraphNode,
             ITargetedDependenciesSnapshot targetedSnapshot)
@@ -75,27 +75,25 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes.V
 
                 Builder.AddGraphNode(
                     graphContext,
-                    dependency.FullPath,
+                    dependency.ProjectId,
                     dependencyGraphNode,
                     childDependency.ToViewModel(otherProjectTargetedSnapshot));
             }
         }
 
         /// <summary>
-        /// Returns true if the updated dependency's path matches the updated snapshot's project path,
+        /// Returns true if the updated dependency's project matches the updated snapshot's project,
         /// meaning the project dependency has changed and we want to try and update.
         /// </summary>
         /// <inheritdoc />
-        public override bool ShouldApplyChanges(string nodeProjectPath, string updatedSnapshotProjectPath, IDependency updatedDependency)
+        public override bool ShouldApplyChanges(IProjectIdentity nodeProjectId, IProjectIdentity updatedSnapshotProjectId, IDependency updatedDependency)
         {
-            string dependencyProjectPath = updatedDependency.FullPath;
-            return !string.IsNullOrEmpty(dependencyProjectPath)
-                    && dependencyProjectPath.Equals(updatedSnapshotProjectPath, StringComparisons.Paths);
+            return Equals(updatedDependency.ProjectId, updatedSnapshotProjectId);
         }
 
         public override bool ApplyChanges(
             IGraphContext graphContext,
-            string nodeProjectPath,
+            IProjectIdentity nodeProjectId,
             IDependency updatedDependency,
             GraphNode dependencyGraphNode,
             ITargetedDependenciesSnapshot targetedSnapshot)
@@ -113,14 +111,14 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes.V
                 dependencyGraphNode,
                 // Project references list all top level dependencies as direct children
                 updatedChildren: referencedProjectSnapshot.TopLevelDependencies,
-                // Pass the path of the referenced project
-                nodeProjectPath: updatedDependency.FullPath,
+                // Pass the ID of the referenced project
+                nodeProjectId: updatedDependency.ProjectId,
                 targetedSnapshot: referencedProjectSnapshot);
         }
 
         public override bool MatchSearchResults(
             IDependency topLevelDependency,
-            Dictionary<string, HashSet<IDependency>> searchResultsPerContext,
+            Dictionary<IProjectIdentity, HashSet<IDependency>> searchResultsPerContext,
             out HashSet<IDependency> topLevelDependencyMatches)
         {
             topLevelDependencyMatches = new HashSet<IDependency>();
@@ -135,9 +133,9 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes.V
                 return true;
             }
 
-            string projectFullPath = topLevelDependency.FullPath;
+            IProjectIdentity projectId = topLevelDependency.ProjectId;
 
-            if (!searchResultsPerContext.TryGetValue(projectFullPath, out HashSet<IDependency> contextResults)
+            if (!searchResultsPerContext.TryGetValue(projectId, out HashSet<IDependency> contextResults)
                 || contextResults.Count == 0)
             {
                 return true;

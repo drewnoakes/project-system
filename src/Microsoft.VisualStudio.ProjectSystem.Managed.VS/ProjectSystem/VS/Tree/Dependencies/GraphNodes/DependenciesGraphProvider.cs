@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel.Composition;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -122,34 +121,34 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes
 
         public GraphNode AddGraphNode(
             IGraphContext graphContext,
-            string projectPath,
+            IProjectIdentity projectId,
             GraphNode parentNode,
             IDependencyViewModel viewModel)
         {
             Assumes.True(IsInitialized);
 
             string modelId = viewModel.OriginalModel == null ? viewModel.Caption : viewModel.OriginalModel.Id;
-            GraphNodeId newNodeId = GetGraphNodeId(projectPath, parentNode, modelId);
-            return DoAddGraphNode(newNodeId, graphContext, projectPath, parentNode, viewModel);
+            GraphNodeId newNodeId = CreateGraphNodeId(projectId, parentNode, modelId);
+            return DoAddGraphNode(newNodeId, graphContext, projectId, parentNode, viewModel);
         }
 
         public GraphNode AddTopLevelGraphNode(
             IGraphContext graphContext,
-            string projectPath,
+            IProjectIdentity projectId,
             IDependencyViewModel viewModel)
         {
             Requires.NotNull(viewModel.OriginalModel, nameof(viewModel.OriginalModel));
 
             Assumes.True(IsInitialized);
 
-            GraphNodeId newNodeId = GetTopLevelGraphNodeId(projectPath, viewModel.OriginalModel.GetTopLevelId());
-            return DoAddGraphNode(newNodeId, graphContext, projectPath, parentNode: null, viewModel);
+            GraphNodeId newNodeId = CreateTopLevelGraphNodeId(projectId, viewModel.OriginalModel.GetTopLevelId());
+            return DoAddGraphNode(newNodeId, graphContext, projectId, parentNode: null, viewModel);
         }
 
         private GraphNode DoAddGraphNode(
             GraphNodeId graphNodeId,
             IGraphContext graphContext,
-            string projectPath,
+            IProjectIdentity projectId,
             GraphNode parentNode,
             IDependencyViewModel viewModel)
         {
@@ -159,6 +158,8 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes
             GraphNode newNode = graphContext.Graph.Nodes.GetOrCreate(graphNodeId, label: viewModel.Caption, category: DependenciesGraphSchema.CategoryDependency);
 
             newNode.SetValue(DgmlNodeProperties.Icon, _iconCache.GetName(viewModel.Icon));
+
+            string projectPath = projectId.CurrentProjectPath;
 
             // priority sets correct order among peers
             newNode.SetValue(CodeNodeProperties.SourceLocation, new SourceLocation(projectPath, new Position(viewModel.Priority, 0)));
@@ -181,13 +182,13 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes
 
         public void RemoveGraphNode(
             IGraphContext graphContext,
-            string projectPath,
+            IProjectIdentity projectId,
             string modelId,
             GraphNode parentNode)
         {
             Assumes.True(IsInitialized);
 
-            GraphNodeId id = GetGraphNodeId(projectPath, parentNode, modelId);
+            GraphNodeId id = CreateGraphNodeId(projectId, parentNode, modelId);
             GraphNode nodeToRemove = graphContext.Graph.Nodes.Get(id);
 
             if (nodeToRemove != null)
@@ -197,40 +198,49 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes
             }
         }
 
-        private static GraphNodeId GetGraphNodeId(string projectPath, GraphNode parentNode, string modelId)
+        private static GraphNodeId CreateGraphNodeId(IProjectIdentity projectId, GraphNode parentNode, string modelId)
         {
-            string parents;
-            if (parentNode != null)
+            // To ensure the GraphNode ID is unique we prefix it with information about its parent
+            string ns = DescribeParents() + ";" + modelId.GetHashCode().ToString();
+
+            return GraphNodeId.GetNested(
+                GraphNodeId.GetPartial(CodeGraphNodeIdName.Assembly, new Uri(projectId.CurrentProjectPath, UriKind.RelativeOrAbsolute)),
+                GraphNodeId.GetPartial(CodeGraphNodeIdName.Namespace, ns),
+                GraphNodeId.GetPartial(DependenciesGraphSchema.ProjectIdName, projectId),
+                GraphNodeId.GetPartial(DependenciesGraphSchema.DependencyModelIdName, modelId));
+
+            string DescribeParents()
             {
-                // to ensure Graph id for node is unique we add a hashcodes for node's parents separated by ';'
-                parents = parentNode.Id.GetNestedValueByName<string>(CodeGraphNodeIdName.Namespace);
+                if (parentNode == null)
+                {
+                    return projectId.GetHashCode().ToString();
+                }
+
+                string parents = parentNode.Id.GetNestedValueByName<string>(CodeGraphNodeIdName.Namespace);
+
                 if (string.IsNullOrEmpty(parents))
                 {
-                    string currentProject = parentNode.Id.GetValue(CodeGraphNodeIdName.Assembly) ?? projectPath;
+                    IProjectIdentity currentProject = parentNode.Id.GetProjectId() ?? projectId;
+
                     parents = currentProject.GetHashCode().ToString();
                 }
-            }
-            else
-            {
-                parents = projectPath.GetHashCode().ToString();
-            }
 
-            parents = parents + ";" + modelId.GetHashCode();
-
-            return GraphNodeId.GetNested(
-                GraphNodeId.GetPartial(CodeGraphNodeIdName.Assembly, new Uri(projectPath, UriKind.RelativeOrAbsolute)),
-                GraphNodeId.GetPartial(CodeGraphNodeIdName.File, new Uri(modelId.ToLowerInvariant(), UriKind.RelativeOrAbsolute)),
-                GraphNodeId.GetPartial(CodeGraphNodeIdName.Namespace, parents));
+                return parents;
+            }
         }
 
-        private static GraphNodeId GetTopLevelGraphNodeId(string projectPath, string modelId)
+        private static GraphNodeId CreateTopLevelGraphNodeId(IProjectIdentity projectId, string modelId)
         {
-            string projectFolder = Path.GetDirectoryName(projectPath)?.ToLowerInvariant() ?? string.Empty;
-            var filePath = new Uri(Path.Combine(projectFolder, modelId.ToLowerInvariant()), UriKind.RelativeOrAbsolute);
+            // Top level nodes are created by DependenciesTreeViewProvider
+
+//            string projectFolder = Path.GetDirectoryName(projectPath)?.ToLowerInvariant() ?? string.Empty;
+//            var filePath = new Uri(Path.Combine(projectFolder, modelId.ToLowerInvariant()), UriKind.RelativeOrAbsolute);
 
             return GraphNodeId.GetNested(
-                GraphNodeId.GetPartial(CodeGraphNodeIdName.Assembly, new Uri(projectPath, UriKind.RelativeOrAbsolute)),
-                GraphNodeId.GetPartial(CodeGraphNodeIdName.File, filePath));
+                GraphNodeId.GetPartial(CodeGraphNodeIdName.Assembly, new Uri(projectId.CurrentProjectPath, UriKind.RelativeOrAbsolute)),
+                GraphNodeId.GetPartial(DependenciesGraphSchema.ProjectIdName, projectId),
+                GraphNodeId.GetPartial(DependenciesGraphSchema.DependencyModelIdName, modelId));
+//                GraphNodeId.GetPartial(CodeGraphNodeIdName.File, filePath));
         }
 
         private sealed class GraphIconCache

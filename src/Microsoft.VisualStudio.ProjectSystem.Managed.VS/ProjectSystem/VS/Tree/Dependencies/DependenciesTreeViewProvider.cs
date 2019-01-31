@@ -146,9 +146,10 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies
                 return null;
             }
 
+            // The dependencies node may be the root or one of its children, so search both for the identifying flag
             IProjectTree dependenciesNode = root.Flags.Contains(DependencyTreeFlags.DependenciesRootNodeFlags)
                 ? root
-                : root.GetSubTreeNode(DependencyTreeFlags.DependenciesRootNodeFlags);
+                : root.GetChildWithFlags(DependencyTreeFlags.DependenciesRootNodeFlags);
 
             return dependenciesNode?.GetSelfAndDescendentsBreadthFirst()
                 .FirstOrDefault((node, p) => string.Equals(node.FilePath, p, StringComparison.OrdinalIgnoreCase), path);

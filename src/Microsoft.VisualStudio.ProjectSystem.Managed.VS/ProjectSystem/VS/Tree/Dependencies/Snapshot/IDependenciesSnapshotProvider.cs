@@ -19,15 +19,6 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
         IDependenciesSnapshot CurrentSnapshot { get; }
 
         /// <summary>
-        /// Raised when the project's full path changes (i.e. due to being renamed).
-        /// </summary>
-        /// <remarks>
-        /// This event fires after <see cref="CurrentSnapshot"/> is updated with the new path,
-        /// but before <see cref="SnapshotChanged"/> fires for that update.
-        /// </remarks>
-        event EventHandler<ProjectPathChangedEventArgs> ProjectPathChanged;
-
-        /// <summary>
         /// Raised when the project's dependencies snapshot changed.
         /// </summary>
         event EventHandler<SnapshotChangedEventArgs> SnapshotChanged;
@@ -66,22 +57,22 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
         public CancellationToken Token { get; }
     }
 
-    internal sealed class ProjectPathChangedEventArgs : EventArgs
-    {
-        public string OldPath { get; }
-        public string NewPath { get; }
-        public IDependenciesSnapshotProvider SnapshotProvider { get; }
-
-        public ProjectPathChangedEventArgs(string oldPath, string newPath, IDependenciesSnapshotProvider snapshotProvider)
-        {
-            Requires.NotNullOrWhiteSpace(oldPath, nameof(oldPath));
-            Requires.NotNullOrWhiteSpace(newPath, nameof(newPath));
-            Assumes.True(!StringComparers.Paths.Equals(oldPath, newPath), "Assume old and new paths are different.");
-            Requires.NotNull(snapshotProvider, nameof(snapshotProvider));
-
-            OldPath = oldPath;
-            NewPath = newPath;
-            SnapshotProvider = snapshotProvider;
-        }
-    }
+//    internal sealed class ProjectPathChangedEventArgs : EventArgs
+//    {
+//        public string OldPath { get; }
+//        public string NewPath { get; }
+//        public IDependenciesSnapshotProvider SnapshotProvider { get; }
+//
+//        public ProjectPathChangedEventArgs(string oldPath, string newPath, IDependenciesSnapshotProvider snapshotProvider)
+//        {
+//            Requires.NotNullOrWhiteSpace(oldPath, nameof(oldPath));
+//            Requires.NotNullOrWhiteSpace(newPath, nameof(newPath));
+//            Assumes.True(!StringComparers.Paths.Equals(oldPath, newPath), "Assume old and new paths are different.");
+//            Requires.NotNull(snapshotProvider, nameof(snapshotProvider));
+//
+//            OldPath = oldPath;
+//            NewPath = newPath;
+//            SnapshotProvider = snapshotProvider;
+//        }
+//    }
 }

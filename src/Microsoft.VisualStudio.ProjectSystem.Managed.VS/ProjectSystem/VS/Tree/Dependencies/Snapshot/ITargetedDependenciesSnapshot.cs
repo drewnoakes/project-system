@@ -13,9 +13,9 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
     internal interface ITargetedDependenciesSnapshot
     {
         /// <summary>
-        /// Path to project containing this snapshot.
+        /// Identity of the project containing this snapshot.
         /// </summary>
-        string ProjectPath { get; }
+        IProjectIdentity ProjectId { get; }
 
         /// <summary>
         /// <see cref="ITargetFramework" /> for which project has dependencies contained in this snapshot.

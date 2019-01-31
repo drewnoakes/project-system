@@ -7,7 +7,6 @@ using System.Linq;
 
 using Microsoft.VisualStudio.Composition;
 using Microsoft.VisualStudio.GraphModel;
-using Microsoft.VisualStudio.GraphModel.Schemas;
 using Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes.ViewProviders;
 using Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot;
 
@@ -117,14 +116,14 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes
                         continue;
                     }
 
-                    string nodeProjectPath = inputGraphNode.Id.GetValue(CodeGraphNodeIdName.Assembly);
-                    if (string.IsNullOrEmpty(nodeProjectPath))
+                    IProjectIdentity nodeProjectId = inputGraphNode.Id.GetProjectId();
+
+                    if (nodeProjectId == null)
                     {
                         continue;
                     }
 
-                    // BUG after a project rename, graph nodes have outdated paths and we receive null
-                    IDependenciesSnapshot updatedSnapshot = _aggregateSnapshotProvider.GetSnapshot(nodeProjectPath);
+                    IDependenciesSnapshot updatedSnapshot = _aggregateSnapshotProvider.GetSnapshot(nodeProjectId);
 
                     IDependency updatedDependency = updatedSnapshot?.FindDependency(existingDependencyId);
 
@@ -140,7 +139,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes
                         continue;
                     }
 
-                    if (!viewProvider.ShouldApplyChanges(nodeProjectPath, snapshot.ProjectPath, updatedDependency))
+                    if (!viewProvider.ShouldApplyChanges(nodeProjectId, snapshot.ProjectId, updatedDependency))
                     {
                         continue;
                     }
@@ -149,7 +148,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes
                     {
                         if (viewProvider.ApplyChanges(
                             graphContext,
-                            nodeProjectPath,
+                            nodeProjectId,
                             updatedDependency,
                             inputGraphNode,
                             updatedSnapshot.Targets[updatedDependency.TargetFramework]))

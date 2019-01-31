@@ -11,15 +11,15 @@ using Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot.Filters
 
 namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
 {
-    [DebuggerDisplay("{TargetFramework.FriendlyName} - {DependenciesWorld.Count} dependencies ({TopLevelDependencies} top level) - {ProjectPath}")]
+    [DebuggerDisplay("{TargetFramework.FriendlyName} - {DependenciesWorld.Count} dependencies ({TopLevelDependencies} top level) - {ProjectId.CurrentProjectPath}")]
     internal sealed class TargetedDependenciesSnapshot : ITargetedDependenciesSnapshot
     {
         #region Factories and internal constructor
 
-        public static ITargetedDependenciesSnapshot CreateEmpty(string projectPath, ITargetFramework targetFramework, IProjectCatalogSnapshot catalogs)
+        public static ITargetedDependenciesSnapshot CreateEmpty(IProjectIdentity projectId, ITargetFramework targetFramework, IProjectCatalogSnapshot catalogs)
         {
             return new TargetedDependenciesSnapshot(
-                projectPath,
+                projectId,
                 targetFramework,
                 catalogs,
                 ImmutableStringDictionary<IDependency>.EmptyOrdinalIgnoreCase);
@@ -31,7 +31,6 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
         /// </summary>
         /// <returns>An updated snapshot, or <paramref name="previousSnapshot"/> if no changes occured.</returns>
         public static ITargetedDependenciesSnapshot FromChanges(
-            string projectPath,
             ITargetedDependenciesSnapshot previousSnapshot,
             IDependenciesChanges changes,
             IProjectCatalogSnapshot catalogs,
@@ -39,7 +38,6 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
             IReadOnlyDictionary<string, IProjectDependenciesSubTreeProvider> subTreeProviderByProviderType,
             IImmutableSet<string> projectItemSpecs)
         {
-            Requires.NotNullOrWhiteSpace(projectPath, nameof(projectPath));
             Requires.NotNull(previousSnapshot, nameof(previousSnapshot));
             // catalogs can be null
             Requires.NotNull(changes, nameof(changes));
@@ -76,14 +74,13 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
             // Also factor in any changes to path/framework/catalogs
             anyChanges =
                 anyChanges ||
-                !StringComparers.Paths.Equals(projectPath, previousSnapshot.ProjectPath) ||
                 !targetFramework.Equals(previousSnapshot.TargetFramework) ||
                 !Equals(catalogs, previousSnapshot.Catalogs);
 
             if (anyChanges)
             {
                 return new TargetedDependenciesSnapshot(
-                    projectPath,
+                    previousSnapshot.ProjectId,
                     targetFramework,
                     catalogs,
                     worldBuilder.ToImmutable());
@@ -126,7 +123,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
             void Add(AddDependencyContext context, IDependencyModel dependencyModel)
             {
                 // Create the unfiltered dependency
-                IDependency dependency = new Dependency(dependencyModel, targetFramework, projectPath);
+                IDependency dependency = new Dependency(dependencyModel, targetFramework, previousSnapshot.ProjectId);
 
                 context.Reset();
 
@@ -165,17 +162,17 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
 
         // Internal, for test use -- normal code should use the factory methods
         internal TargetedDependenciesSnapshot(
-            string projectPath,
+            IProjectIdentity projectId,
             ITargetFramework targetFramework,
             IProjectCatalogSnapshot catalogs,
             ImmutableDictionary<string, IDependency> dependenciesWorld)
         {
-            Requires.NotNullOrEmpty(projectPath, nameof(projectPath));
+            Requires.NotNull(projectId, nameof(projectId));
             Requires.NotNull(targetFramework, nameof(targetFramework));
             // catalogs can be null
             Requires.NotNull(dependenciesWorld, nameof(dependenciesWorld));
 
-            ProjectPath = projectPath;
+            ProjectId = projectId;
             TargetFramework = targetFramework;
             Catalogs = catalogs;
             DependenciesWorld = dependenciesWorld;
@@ -214,7 +211,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
         #endregion
 
         /// <inheritdoc />
-        public string ProjectPath { get; }
+        public IProjectIdentity ProjectId { get; }
 
         /// <inheritdoc />
         public ITargetFramework TargetFramework { get; }

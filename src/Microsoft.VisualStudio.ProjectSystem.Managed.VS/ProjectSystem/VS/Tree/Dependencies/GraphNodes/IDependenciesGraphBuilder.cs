@@ -14,18 +14,18 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes
     {
         GraphNode AddGraphNode(
             IGraphContext graphContext,
-            string projectPath,
+            IProjectIdentity projectId,
             GraphNode parentNode,
             IDependencyViewModel viewModel);
 
         GraphNode AddTopLevelGraphNode(
             IGraphContext graphContext,
-            string projectPath,
+            IProjectIdentity projectId,
             IDependencyViewModel viewModel);
 
         void RemoveGraphNode(
             IGraphContext graphContext,
-            string projectPath,
+            IProjectIdentity projectId,
             string modelId,
             GraphNode parentNode);
     }

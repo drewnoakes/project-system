@@ -6,7 +6,6 @@ using System.Collections.Immutable;
 using Microsoft.VisualStudio.Buffers.PooledObjects;
 using Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.CrossTarget;
 using Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Models;
-using Microsoft.VisualStudio.ProjectSystem.VS.Utilities;
 using Microsoft.VisualStudio.Text;
 
 namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
@@ -27,19 +26,18 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
         public const int ComNodePriority = 170;
         public const int SdkNodePriority = 180;
 
-        public Dependency(IDependencyModel dependencyModel, ITargetFramework targetFramework, string containingProjectPath)
+        public Dependency(IDependencyModel dependencyModel, ITargetFramework targetFramework, IProjectIdentity projectId)
         {
             Requires.NotNull(dependencyModel, nameof(dependencyModel));
             Requires.NotNullOrEmpty(dependencyModel.ProviderType, nameof(dependencyModel.ProviderType));
             Requires.NotNullOrEmpty(dependencyModel.Id, nameof(dependencyModel.Id));
             Requires.NotNull(targetFramework, nameof(targetFramework));
-            Requires.NotNullOrEmpty(containingProjectPath, nameof(containingProjectPath));
+            Requires.NotNull(projectId, nameof(projectId));
 
             TargetFramework = targetFramework;
 
             _modelId = dependencyModel.Id;
-            _containingProjectPath = containingProjectPath;
-
+            ProjectId = projectId;
             ProviderType = dependencyModel.ProviderType;
             Name = dependencyModel.Name ?? string.Empty;
             Caption = dependencyModel.Caption ?? string.Empty;
@@ -118,10 +116,9 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
         {
             // Copy values as necessary to create a clone with any properties overridden
 
+            ProjectId = dependency.ProjectId;
             _modelId = dependency._modelId;
-            _fullPath = dependency._fullPath;
             TargetFramework = dependency.TargetFramework;
-            _containingProjectPath = dependency._containingProjectPath;
             ProviderType = dependency.ProviderType;
             Name = dependency.Name;
             OriginalItemSpec = dependency.OriginalItemSpec;
@@ -147,9 +144,8 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
         /// to get a unique id for the whole snapshot.
         /// </summary>
         private readonly string _modelId;
+
         private string _id;
-        private readonly string _containingProjectPath;
-        private string _fullPath;
 
         public string Id
         {
@@ -164,33 +160,34 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
             }
         }
 
+        public IProjectIdentity ProjectId { get; }
         public string ProviderType { get; }
         public string Name { get; }
         public string OriginalItemSpec { get; }
         public string Path { get; }
 
-        public string FullPath
-        {
-            get
-            {
-                // Avoid calculating this unless absolutely needed as 
-                // we have a lot of Dependency instances floating around
-                if (_fullPath == null)
-                {
-                    _fullPath = GetFullPath();
-                }
-
-                return _fullPath;
-
-                string GetFullPath()
-                {
-                    if (string.IsNullOrEmpty(OriginalItemSpec) || ManagedPathHelper.IsRooted(OriginalItemSpec))
-                        return OriginalItemSpec ?? string.Empty;
-
-                    return ManagedPathHelper.TryMakeRooted(_containingProjectPath, OriginalItemSpec);
-                }
-            }
-        }
+//        public string FullPath
+//        {
+//            get
+//            {
+//                // Avoid calculating this unless absolutely needed as 
+//                // we have a lot of Dependency instances floating around
+//                if (_fullPath == null)
+//                {
+//                    _fullPath = GetFullPath();
+//                }
+//
+//                return _fullPath;
+//
+//                string GetFullPath()
+//                {
+//                    if (string.IsNullOrEmpty(OriginalItemSpec) || ManagedPathHelper.IsRooted(OriginalItemSpec))
+//                        return OriginalItemSpec ?? string.Empty;
+//
+//                    return ManagedPathHelper.TryMakeRooted(_containingProjectPath, OriginalItemSpec);
+//                }
+//            }
+//        }
 
         public string SchemaName { get; }
 

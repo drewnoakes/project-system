@@ -19,9 +19,9 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
         ITargetFramework TargetFramework { get; }
 
         /// <summary>
-        /// Get the full path of the dependency, if relevant, otherwise, <see cref="string.Empty"/>.
+        /// Gets the identity of the project to which this dependency belongs.
         /// </summary>
-        string FullPath { get; }
+        IProjectIdentity ProjectId { get; }
 
         /// <summary>
         /// Alias is used to de-dupe tree nodes in the CPS tree. If there are several nodes in the same

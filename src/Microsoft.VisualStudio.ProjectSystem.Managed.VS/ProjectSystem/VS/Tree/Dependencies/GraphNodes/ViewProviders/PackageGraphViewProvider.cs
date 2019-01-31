@@ -30,7 +30,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes.V
 
         public override void BuildGraph(
             IGraphContext graphContext,
-            string projectPath,
+            IProjectIdentity projectId,
             IDependency dependency,
             GraphNode dependencyGraphNode,
             ITargetedDependenciesSnapshot targetedSnapshot)
@@ -71,7 +71,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes.V
                 {
                     Builder.AddGraphNode(
                         graphContext,
-                        projectPath,
+                        projectId,
                         dependencyGraphNode,
                         fxAssembly.ToViewModel(targetedSnapshot));
                 }
@@ -82,14 +82,14 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes.V
                 {
                     Builder.AddGraphNode(
                         graphContext,
-                        projectPath,
+                        projectId,
                         dependencyGraphNode,
                         childDependency.ToViewModel(targetedSnapshot));
                 }
 
                 if (fxAssembliesChildren.Count > 0)
                 {
-                    GraphNode fxAssembliesNode = Builder.AddGraphNode(graphContext, projectPath, dependencyGraphNode, PackageFrameworkAssembliesViewModel.Instance);
+                    GraphNode fxAssembliesNode = Builder.AddGraphNode(graphContext, projectId, dependencyGraphNode, PackageFrameworkAssembliesViewModel.Instance);
                     fxAssembliesNode.SetValue(DgmlNodeProperties.ContainsChildren, true);
                     fxAssembliesNode.SetValue(DependenciesGraphSchema.IsFrameworkAssemblyFolderProperty, true);
                     fxAssembliesNode.SetValue(DependenciesGraphSchema.DependencyIdProperty, dependency.Id);

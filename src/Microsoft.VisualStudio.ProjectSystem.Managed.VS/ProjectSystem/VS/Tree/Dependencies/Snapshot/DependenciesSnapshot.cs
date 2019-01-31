@@ -12,15 +12,15 @@ using Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot.Filters
 namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
 {
     /// <inheritdoc />
-    [DebuggerDisplay("{Targets.Count} targets - {ProjectPath}")]
+    [DebuggerDisplay("{Targets.Count} targets - {ProjectId.CurrentProjectPath}")]
     internal sealed class DependenciesSnapshot : IDependenciesSnapshot
     {
         #region Factories and private constructor
 
-        public static DependenciesSnapshot CreateEmpty(string projectPath)
+        public static DependenciesSnapshot CreateEmpty(IProjectIdentity projectId)
         {
             return new DependenciesSnapshot(
-                projectPath,
+                projectId,
                 activeTarget: TargetFramework.Empty,
                 targets: ImmutableDictionary<ITargetFramework, ITargetedDependenciesSnapshot>.Empty);
         }
@@ -37,7 +37,6 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
         /// </remarks>
         /// <returns>An updated snapshot, or <paramref name="previousSnapshot"/> if no changes occured.</returns>
         public static DependenciesSnapshot FromChanges(
-            string projectPath,
             DependenciesSnapshot previousSnapshot,
             ImmutableDictionary<ITargetFramework, IDependenciesChanges> changes,
             IProjectCatalogSnapshot catalogs,
@@ -46,7 +45,6 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
             IReadOnlyDictionary<string, IProjectDependenciesSubTreeProvider> subTreeProviderByProviderType,
             IImmutableSet<string> projectItemSpecs)
         {
-            Requires.NotNullOrWhiteSpace(projectPath, nameof(projectPath));
             Requires.NotNull(previousSnapshot, nameof(previousSnapshot));
             Requires.NotNull(changes, nameof(changes));
             // catalogs can be null
@@ -62,11 +60,10 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
             {
                 if (!builder.TryGetValue(targetFramework, out ITargetedDependenciesSnapshot previousTargetedSnapshot))
                 {
-                    previousTargetedSnapshot = TargetedDependenciesSnapshot.CreateEmpty(projectPath, targetFramework, catalogs);
+                    previousTargetedSnapshot = TargetedDependenciesSnapshot.CreateEmpty(previousSnapshot.ProjectId, targetFramework, catalogs);
                 }
 
                 ITargetedDependenciesSnapshot newTargetedSnapshot = TargetedDependenciesSnapshot.FromChanges(
-                    projectPath,
                     previousTargetedSnapshot,
                     dependenciesChanges,
                     catalogs,
@@ -89,7 +86,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
             {
                 // Targets have changed
                 return new DependenciesSnapshot(
-                    previousSnapshot.ProjectPath,
+                    previousSnapshot.ProjectId,
                     activeTarget,
                     builder.ToImmutable());
             }
@@ -98,7 +95,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
             {
                 // The active target changed
                 return new DependenciesSnapshot(
-                    previousSnapshot.ProjectPath,
+                    previousSnapshot.ProjectId,
                     activeTarget,
                     previousSnapshot.Targets);
             }
@@ -148,19 +145,19 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
             // Return this if no targets changed
             return ReferenceEquals(newTargets, Targets)
                 ? this
-                : new DependenciesSnapshot(ProjectPath, ActiveTarget, newTargets);
+                : new DependenciesSnapshot(ProjectId, ActiveTarget, newTargets);
         }
 
         private DependenciesSnapshot(
-            string projectPath,
+            IProjectIdentity projectId,
             ITargetFramework activeTarget,
             ImmutableDictionary<ITargetFramework, ITargetedDependenciesSnapshot> targets)
         {
-            Requires.NotNullOrEmpty(projectPath, nameof(projectPath));
+            Requires.NotNull(projectId, nameof(projectId));
             Requires.NotNull(activeTarget, nameof(activeTarget));
             Requires.NotNull(targets, nameof(targets));
 
-            ProjectPath = projectPath;
+            ProjectId = projectId;
             ActiveTarget = activeTarget;
             Targets = targets;
         }
@@ -168,7 +165,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
         #endregion
 
         /// <inheritdoc />
-        public string ProjectPath { get; }
+        public IProjectIdentity ProjectId { get; }
 
         /// <inheritdoc />
         public ITargetFramework ActiveTarget { get; }
@@ -221,10 +218,10 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
             }
         }
 
-        /// <inheritdoc />
-        public bool Equals(IDependenciesSnapshot other)
-        {
-            return other != null && other.ProjectPath.Equals(ProjectPath, StringComparison.OrdinalIgnoreCase);
-        }
+//        /// <inheritdoc />
+//        public bool Equals(IDependenciesSnapshot other)
+//        {
+//            return other != null && other.ProjectPath.Equals(ProjectPath, StringComparison.OrdinalIgnoreCase);
+//        }
     }
 }

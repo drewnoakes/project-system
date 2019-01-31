@@ -33,19 +33,19 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes.V
 
         public abstract void BuildGraph(
             IGraphContext graphContext,
-            string projectPath,
+            IProjectIdentity projectId,
             IDependency dependency,
             GraphNode dependencyGraphNode,
             ITargetedDependenciesSnapshot targetedSnapshot);
 
-        public virtual bool ShouldApplyChanges(string nodeProjectPath, string updatedSnapshotProjectPath, IDependency updatedDependency)
+        public virtual bool ShouldApplyChanges(IProjectIdentity nodeProjectId, IProjectIdentity updatedSnapshotProjectId, IDependency updatedDependency)
         {
-            return nodeProjectPath.Equals(updatedSnapshotProjectPath, StringComparisons.Paths);
+            return nodeProjectId.Equals(updatedSnapshotProjectId);
         }
 
         public virtual bool ApplyChanges(
             IGraphContext graphContext,
-            string nodeProjectPath,
+            IProjectIdentity nodeProjectId,
             IDependency updatedDependency,
             GraphNode dependencyGraphNode,
             ITargetedDependenciesSnapshot targetedSnapshot)
@@ -55,7 +55,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes.V
                 updatedDependency,
                 dependencyGraphNode,
                 updatedChildren: targetedSnapshot.GetDependencyChildren(updatedDependency),
-                nodeProjectPath: nodeProjectPath,
+                nodeProjectId: nodeProjectId,
                 targetedSnapshot);
         }
 
@@ -64,7 +64,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes.V
             IDependency updatedDependency,
             GraphNode dependencyGraphNode,
             ImmutableArray<IDependency> updatedChildren,
-            string nodeProjectPath,
+            IProjectIdentity nodeProjectId,
             ITargetedDependenciesSnapshot targetedSnapshot)
         {
             IEnumerable<string> existingChildModelIds = GetExistingChildren();
@@ -77,7 +77,11 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes.V
             foreach (string childModelIdToRemove in diff.Removed)
             {
                 anyChanges = true;
-                Builder.RemoveGraphNode(graphContext, nodeProjectPath, childModelIdToRemove, dependencyGraphNode);
+                Builder.RemoveGraphNode(
+                    graphContext,
+                    nodeProjectId,
+                    childModelIdToRemove,
+                    dependencyGraphNode);
             }
 
             foreach (string childModeIdToAdd in diff.Added)
@@ -91,7 +95,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes.V
                 anyChanges = true;
                 Builder.AddGraphNode(
                     graphContext,
-                    nodeProjectPath,
+                    nodeProjectId,
                     dependencyGraphNode,
                     dependency.ToViewModel(targetedSnapshot));
             }
@@ -118,7 +122,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes.V
 
         public virtual bool MatchSearchResults(
             IDependency topLevelDependency,
-            Dictionary<string, HashSet<IDependency>> searchResultsPerContext,
+            Dictionary<IProjectIdentity, HashSet<IDependency>> searchResultsPerContext,
             out HashSet<IDependency> topLevelDependencyMatches)
         {
             topLevelDependencyMatches = null;

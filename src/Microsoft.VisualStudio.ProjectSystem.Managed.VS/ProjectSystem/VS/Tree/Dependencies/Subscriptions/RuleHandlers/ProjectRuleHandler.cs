@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel.Composition;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -111,13 +112,13 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Subscription
             CancellationToken token)
         {
             if (token.IsCancellationRequested ||
-                StringComparers.Paths.Equals(thisProjectSnapshot.ProjectPath, otherProjectSnapshot.ProjectPath))
+                thisProjectSnapshot.ProjectId.Equals(otherProjectSnapshot.ProjectId))
             {
                 // if any of the snapshots is not provided or this is the same project - skip
                 return;
             }
 
-            string otherProjectPath = otherProjectSnapshot.ProjectPath;
+            IProjectIdentity otherProjectId = otherProjectSnapshot.ProjectId;
 
             foreach ((ITargetFramework _, ITargetedDependenciesSnapshot targetedDependencies) in thisProjectSnapshot.Targets)
             {
@@ -126,19 +127,31 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Subscription
                     if (token.IsCancellationRequested)
                         return;
 
-                    // We're only interested in project dependencies
-                    if (!StringComparers.DependencyProviderTypes.Equals(dependency.ProviderType, ProviderTypeString))
-                        continue;
-
-                    if (!StringComparers.Paths.Equals(otherProjectPath, dependency.FullPath))
-                        continue;
-
-                    RaiseChangeEvent(dependency);
-                    break;
+                    if (IsDependencyUponOtherProject(dependency))
+                    {
+                        RaiseChangeEvent(dependency);
+                        break;
+                    }
                 }
             }
 
             return;
+
+            bool IsDependencyUponOtherProject(IDependency dependency)
+            {
+                // We're only interested in project dependencies
+                if (!StringComparers.DependencyProviderTypes.Equals(dependency.ProviderType, ProviderTypeString))
+                {
+                    return false;
+                }
+
+                string referencedProjectPath = Path.GetFullPath(
+                    Path.Combine(
+                        Path.GetDirectoryName(thisProjectSnapshot.ProjectId.CurrentProjectPath),
+                        dependency.OriginalItemSpec));
+
+                return StringComparers.Paths.Equals(referencedProjectPath, otherProjectId.CurrentProjectPath);
+            }
 
             void RaiseChangeEvent(IDependency dependency)
             {

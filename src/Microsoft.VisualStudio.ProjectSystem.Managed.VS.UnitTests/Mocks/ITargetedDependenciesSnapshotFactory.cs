@@ -6,6 +6,7 @@ using System.Collections.Immutable;
 using System.Linq;
 
 using Microsoft.VisualStudio.ProjectSystem.Properties;
+using Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies;
 using Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.CrossTarget;
 using Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot;
 
@@ -23,7 +24,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS
         }
 
         public static ITargetedDependenciesSnapshot Implement(
-            string projectPath = null,
+            IProjectIdentity projectId = null,
             ITargetFramework targetFramework = null,
             IEnumerable<IDependency> dependenciesWorld = null,
             bool? hasUnresolvedDependency = null,
@@ -33,7 +34,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS
             MockBehavior mockBehavior = MockBehavior.Default)
         {
             return ImplementMock(
-                projectPath,
+                projectId,
                 targetFramework,
                 dependenciesWorld,
                 hasUnresolvedDependency,
@@ -44,7 +45,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS
         }
 
         public static Mock<ITargetedDependenciesSnapshot> ImplementMock(
-            string projectPath = null,
+            IProjectIdentity projectId = null,
             ITargetFramework targetFramework = null,
             IEnumerable<IDependency> dependenciesWorld = null,
             bool? hasUnresolvedDependency = null,
@@ -55,9 +56,9 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS
         {
             var mock = new Mock<ITargetedDependenciesSnapshot>(mockBehavior);
 
-            if (projectPath != null)
+            if (projectId != null)
             {
-                mock.Setup(x => x.ProjectPath).Returns(projectPath);
+                mock.Setup(x => x.ProjectId).Returns(projectId);
             }
 
             if (targetFramework != null)

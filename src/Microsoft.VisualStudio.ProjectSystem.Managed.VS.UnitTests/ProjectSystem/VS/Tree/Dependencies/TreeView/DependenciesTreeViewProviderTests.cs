@@ -29,7 +29,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.TreeView
             // Arrange
             var dependenciesRoot = new TestProjectTree { Caption = "MyDependencies" };
 
-            var snapshot = DependenciesSnapshot.CreateEmpty(ProjectPath);
+            var snapshot = DependenciesSnapshot.CreateEmpty(new MockProjectIdentity(1));
 
             // Act
             var resultTree = await CreateProvider().BuildTreeAsync(dependenciesRoot, snapshot);

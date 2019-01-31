@@ -32,8 +32,9 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes.A
 
         [ImportingConstructor]
         public CheckChildrenGraphActionHandler(
-            IAggregateDependenciesSnapshotProvider aggregateSnapshotProvider)
-            : base(aggregateSnapshotProvider)
+            IAggregateDependenciesSnapshotProvider aggregateSnapshotProvider,
+            IProjectIdentityService projectIdentityService)
+            : base(aggregateSnapshotProvider, projectIdentityService)
         {
         }
 
@@ -43,7 +44,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes.A
                    graphContext.RequestedProperties.Contains(DgmlNodeProperties.ContainsChildren);
         }
 
-        protected override void ProcessInputNode(IGraphContext graphContext, GraphNode inputGraphNode, IDependency dependency, IDependenciesSnapshot snapshot, IDependenciesGraphViewProvider viewProvider, string projectPath, ref bool trackChanges)
+        protected override void ProcessInputNode(IGraphContext graphContext, GraphNode inputGraphNode, IDependency dependency, IDependenciesSnapshot snapshot, IDependenciesGraphViewProvider viewProvider, IProjectIdentity projectId, ref bool trackChanges)
         {
             inputGraphNode.SetValue(DependenciesGraphSchema.DependencyIdProperty, dependency.Id);
             inputGraphNode.SetValue(DependenciesGraphSchema.ResolvedProperty, dependency.Resolved);

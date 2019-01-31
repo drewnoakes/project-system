@@ -19,7 +19,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes.V
 
         void BuildGraph(
             IGraphContext graphContext,
-            string projectPath,
+            IProjectIdentity projectId,
             IDependency dependency,
             GraphNode dependencyGraphNode,
             ITargetedDependenciesSnapshot targetedSnapshot);
@@ -28,10 +28,13 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes.V
         ///     Gets whether this provider would like to apply changes to a graph node in response to a snapshot update,
         ///     based on the provided arguments.
         /// </summary>
-        /// <param name="nodeProjectPath">The project path stored on the graph node that we want to update.</param>
-        /// <param name="updatedSnapshotProjectPath">The project path according to the updated snapshot we want to apply changes from.</param>
+        /// <param name="nodeProjectId">The project ID stored on the graph node that we want to update.</param>
+        /// <param name="updatedSnapshotProjectId">The project ID according to the updated snapshot we want to apply changes from.</param>
         /// <param name="updatedDependency">The dependency from the updated snapshot with ID matching the graph node we want to update.</param>
-        bool ShouldApplyChanges(string nodeProjectPath, string updatedSnapshotProjectPath, IDependency updatedDependency);
+        bool ShouldApplyChanges(
+            IProjectIdentity nodeProjectId,
+            IProjectIdentity updatedSnapshotProjectId,
+            IDependency updatedDependency);
 
         /// <summary>
         ///     Adds and removes graph nodes to make <paramref name="graphContext"/> match the expected state for
@@ -41,21 +44,21 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes.V
         ///     Should only be called if <see cref="ShouldApplyChanges"/> returned <see langword="true" />.
         /// </remarks>
         /// <param name="graphContext">The context via which to make graph changes.</param>
-        /// <param name="nodeProjectPath">The path of the project containing the node to update.</param>
+        /// <param name="nodeProjectId">The ID of the project containing the node to update.</param>
         /// <param name="updatedDependency">The dependency that changed, triggering this update. It is a dependency of the project owning the graph node to update.</param>
         /// <param name="dependencyGraphNode">The graph node to update in response to the changed dependency.</param>
         /// <param name="targetedSnapshot">The updated snapshot matching <paramref name="updatedDependency"/>'s target framework.</param>
         /// <returns><see langword="true" /> if the graph context was changed, otherwise <see langword="false" />.</returns>
         bool ApplyChanges(
             IGraphContext graphContext,
-            string nodeProjectPath,
+            IProjectIdentity nodeProjectId,
             IDependency updatedDependency,
             GraphNode dependencyGraphNode,
             ITargetedDependenciesSnapshot targetedSnapshot);
 
         bool MatchSearchResults(
             IDependency topLevelDependency,
-            Dictionary<string, HashSet<IDependency>> searchResultsPerContext,
+            Dictionary<IProjectIdentity, HashSet<IDependency>> searchResultsPerContext,
             out HashSet<IDependency> topLevelDependencyMatches);
     }
 }

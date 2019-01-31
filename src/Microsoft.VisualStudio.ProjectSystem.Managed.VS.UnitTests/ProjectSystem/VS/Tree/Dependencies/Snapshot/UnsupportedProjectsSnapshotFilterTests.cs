@@ -77,8 +77,6 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
         [Fact]
         public void BeforeAddOrUpdate_WhenProjectSnapshotFoundAndHasUnresolvedDependencies_ShouldMakeUnresolved()
         {
-            const string projectPath = @"c:\project\project.csproj";
-
             var targetFramework = ITargetFrameworkFactory.Implement(moniker: "tfm1");
 
             var dependency = new TestDependency
@@ -87,8 +85,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
                 TopLevel = true,
                 Resolved = true,
                 Flags = DependencyTreeFlags.ProjectNodeFlags.Union(DependencyTreeFlags.ResolvedFlags),
-                TargetFramework = targetFramework,
-                FullPath = projectPath
+                TargetFramework = targetFramework
             };
 
             var targetedSnapshot = ITargetedDependenciesSnapshotFactory.Implement(hasUnresolvedDependency: true);
@@ -123,15 +120,12 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
         [Fact]
         public void BeforeAddOrUpdate_WhenProjectSnapshotNotFound_ShouldDoNothing()
         {
-            const string projectPath = @"c:\project\project.csproj";
-
             var dependency = new TestDependency
             {
                 Id = "dependency1",
                 TopLevel = true,
                 Resolved = true,
-                Flags = DependencyTreeFlags.ProjectNodeFlags.Union(DependencyTreeFlags.ResolvedFlags),
-                FullPath = projectPath
+                Flags = DependencyTreeFlags.ProjectNodeFlags.Union(DependencyTreeFlags.ResolvedFlags)
             };
 
             var aggregateSnapshotProvider = new Mock<IAggregateDependenciesSnapshotProvider>(MockBehavior.Strict);
@@ -162,8 +156,6 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
         [Fact]
         public void BeforeAddOrUpdate_WhenProjectSnapshotFoundAndNoUnresolvedDependencies_ShouldDoNothing()
         {
-            const string projectPath = @"c:\project\project.csproj";
-
             var targetFramework = ITargetFrameworkFactory.Implement(moniker: "tfm1");
             var targetedSnapshot = ITargetedDependenciesSnapshotFactory.Implement(hasUnresolvedDependency: false);
 
@@ -173,7 +165,6 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
                 TopLevel = true,
                 Resolved = true,
                 Flags = DependencyTreeFlags.ProjectNodeFlags.Union(DependencyTreeFlags.ResolvedFlags),
-                FullPath = projectPath,
                 TargetFramework = targetFramework
             };
 

@@ -26,8 +26,9 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes.A
 
         [ImportingConstructor]
         public GetChildrenGraphActionHandler(
-            IAggregateDependenciesSnapshotProvider aggregateSnapshotProvider)
-            : base(aggregateSnapshotProvider)
+            IAggregateDependenciesSnapshotProvider aggregateSnapshotProvider,
+            IProjectIdentityService projectIdentityService)
+            : base(aggregateSnapshotProvider, projectIdentityService)
         {
         }
 
@@ -36,7 +37,14 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes.A
             return graphContext.Direction == GraphContextDirection.Contains;
         }
 
-        protected override void ProcessInputNode(IGraphContext graphContext, GraphNode inputGraphNode, IDependency dependency, IDependenciesSnapshot snapshot, IDependenciesGraphViewProvider viewProvider, string projectPath, ref bool trackChanges)
+        protected override void ProcessInputNode(
+            IGraphContext graphContext,
+            GraphNode inputGraphNode,
+            IDependency dependency,
+            IDependenciesSnapshot snapshot,
+            IDependenciesGraphViewProvider viewProvider,
+            IProjectIdentity projectId,
+            ref bool trackChanges)
         {
             if (graphContext.TrackChanges)
             {
@@ -45,7 +53,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes.A
 
             viewProvider.BuildGraph(
                 graphContext,
-                projectPath,
+                projectId,
                 dependency,
                 inputGraphNode,
                 snapshot.Targets[dependency.TargetFramework]);

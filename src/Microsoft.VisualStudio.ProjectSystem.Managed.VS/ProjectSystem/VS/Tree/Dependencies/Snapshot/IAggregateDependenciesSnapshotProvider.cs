@@ -18,11 +18,11 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
         void RegisterSnapshotProvider(IDependenciesSnapshotProvider snapshotProvider);
 
         /// <summary>
-        /// Gets the snapshot for <paramref name="projectFilePath"/>, or <see langword="null"/> if none found.
+        /// Gets the snapshot for <paramref name="projectId"/>, or <see langword="null"/> if none found.
         /// </summary>
-        /// <param name="projectFilePath">Path to the project for which the snapshot is requested.</param>
-        /// <returns><see cref="IDependenciesSnapshot"/> or <see langword="null"/> if no project exists with the specified path.</returns>
-        IDependenciesSnapshot GetSnapshot(string projectFilePath);
+        /// <param name="projectId"></param>
+        /// <returns><see cref="IDependenciesSnapshot"/> or <see langword="null"/> if no project exists with the specified identity.</returns>
+        IDependenciesSnapshot GetSnapshot(IProjectIdentity projectId);
 
         /// <summary>
         /// Gets the targeted snapshot for <paramref name="dependency"/>, or <see langword="null"/> if none found.

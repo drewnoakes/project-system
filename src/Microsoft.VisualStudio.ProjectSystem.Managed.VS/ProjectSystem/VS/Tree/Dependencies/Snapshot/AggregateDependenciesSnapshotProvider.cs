@@ -14,10 +14,10 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
     [AppliesTo(ProjectCapability.DependenciesTree)]
     internal sealed class AggregateDependenciesSnapshotProvider : IAggregateDependenciesSnapshotProvider
     {
-        private ImmutableDictionary<string, IDependenciesSnapshotProvider> _snapshotProviderByProjectPath
-            = ImmutableDictionary.Create<string, IDependenciesSnapshotProvider>(StringComparer.OrdinalIgnoreCase);
+        private ImmutableDictionary<IProjectIdentity, IDependenciesSnapshotProvider> _snapshotProviderByProjectId
+            = ImmutableDictionary.Create<IProjectIdentity, IDependenciesSnapshotProvider>();
 
-        /// <summary>Used to serialize writes to <see cref="_snapshotProviderByProjectPath"/>.</summary>
+        /// <summary>Used to serialize writes to <see cref="_snapshotProviderByProjectId"/>.</summary>
         private readonly object _updateLock = new object();
 
         private readonly ITargetFrameworkProvider _targetFrameworkProvider;
@@ -44,12 +44,11 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
 
             lock (_updateLock)
             {
-                string projectPath = snapshotProvider.CurrentSnapshot.ProjectPath;
+                IProjectIdentity projectId = snapshotProvider.CurrentSnapshot.ProjectId;
 
-                _snapshotProviderByProjectPath = _snapshotProviderByProjectPath.Add(projectPath, snapshotProvider);
+                _snapshotProviderByProjectId = _snapshotProviderByProjectId.Add(projectId, snapshotProvider);
 
                 snapshotProvider.SnapshotChanged += OnSnapshotChanged;
-                snapshotProvider.ProjectPathChanged += OnProjectPathChanged;
                 snapshotProvider.SnapshotProviderUnloading += OnSnapshotProviderUnloading;
             }
 
@@ -61,8 +60,8 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
                 lock (_updateLock)
                 {
                     bool removed = ImmutableInterlocked.TryRemove(
-                        ref _snapshotProviderByProjectPath,
-                        snapshotProvider.CurrentSnapshot.ProjectPath,
+                        ref _snapshotProviderByProjectId,
+                        snapshotProvider.CurrentSnapshot.ProjectId,
                         out IDependenciesSnapshotProvider removedProvider);
 
                     if (removed)
@@ -70,40 +69,12 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
                         Assumes.True(ReferenceEquals(snapshotProvider, removedProvider), "Unexpected provider removed from map");
 
                         snapshotProvider.SnapshotChanged -= OnSnapshotChanged;
-                        snapshotProvider.ProjectPathChanged -= OnProjectPathChanged;
                         snapshotProvider.SnapshotProviderUnloading -= OnSnapshotProviderUnloading;
                     }
                     else
                     {
                         System.Diagnostics.Debug.Fail(
-                            $"Received {nameof(snapshotProvider.SnapshotProviderUnloading)} for unknown project: {snapshotProvider.CurrentSnapshot.ProjectPath}");
-                    }
-                }
-            }
-
-            void OnProjectPathChanged(object sender, ProjectPathChangedEventArgs e)
-            {
-                // The project path has changed, so update the key under which the provider is kept
-                lock (_updateLock)
-                {
-                    ImmutableDictionary<string, IDependenciesSnapshotProvider> dic = _snapshotProviderByProjectPath;
-
-                    if (dic.TryGetValue(e.OldPath, out IDependenciesSnapshotProvider provider))
-                    {
-                        System.Diagnostics.Debug.Assert(
-                            ReferenceEquals(e.SnapshotProvider, provider),
-                            $"Received {nameof(snapshotProvider.ProjectPathChanged)} for incorrect provider");
-
-                        dic = dic
-                            .Remove(e.OldPath)
-                            .SetItem(e.NewPath, provider);
-
-                        _snapshotProviderByProjectPath = dic;
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.Fail(
-                            $"Received {nameof(snapshotProvider.ProjectPathChanged)} for unknown project path (within lock): {e.OldPath}");
+                            $"Received {nameof(snapshotProvider.SnapshotProviderUnloading)} for unknown project: {snapshotProvider.CurrentSnapshot.ProjectId}");
                     }
                 }
             }
@@ -116,11 +87,11 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
         }
 
         /// <inheritdoc />
-        public IDependenciesSnapshot GetSnapshot(string projectFilePath)
+        public IDependenciesSnapshot GetSnapshot(IProjectIdentity projectId)
         {
-            Requires.NotNullOrEmpty(projectFilePath, nameof(projectFilePath));
+            Requires.NotNull(projectId, nameof(projectId));
 
-            if (!_snapshotProviderByProjectPath.TryGetValue(projectFilePath, out IDependenciesSnapshotProvider snapshotProvider))
+            if (!_snapshotProviderByProjectId.TryGetValue(projectId, out IDependenciesSnapshotProvider snapshotProvider))
             {
                 // BUG we end up in here when the project has been renamed and the previous path is being remembered elsewhere
             }
@@ -131,7 +102,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
         /// <inheritdoc />
         public ITargetedDependenciesSnapshot GetSnapshot(IDependency dependency)
         {
-            IDependenciesSnapshot snapshot = GetSnapshot(dependency.FullPath);
+            IDependenciesSnapshot snapshot = GetSnapshot(dependency.ProjectId);
 
             if (snapshot == null)
             {
@@ -153,11 +124,11 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
         public ImmutableArray<IDependenciesSnapshot> GetSnapshots()
         {
             // Copy reference to immutable collection for consistency within this method
-            ImmutableDictionary<string, IDependenciesSnapshotProvider> dic = _snapshotProviderByProjectPath;
+            ImmutableDictionary<IProjectIdentity, IDependenciesSnapshotProvider> dic = _snapshotProviderByProjectId;
 
             ImmutableArray<IDependenciesSnapshot>.Builder builder = ImmutableArray.CreateBuilder<IDependenciesSnapshot>(dic.Count);
 
-            foreach ((string _, IDependenciesSnapshotProvider provider) in dic)
+            foreach ((IProjectIdentity _, IDependenciesSnapshotProvider provider) in dic)
             {
                 builder.Add(provider.CurrentSnapshot);
             }

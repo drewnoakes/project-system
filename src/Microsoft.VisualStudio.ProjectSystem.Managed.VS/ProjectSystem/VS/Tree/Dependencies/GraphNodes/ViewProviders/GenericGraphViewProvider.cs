@@ -23,7 +23,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes.V
 
         public override void BuildGraph(
             IGraphContext graphContext,
-            string projectPath,
+            IProjectIdentity projectId,
             IDependency dependency,
             GraphNode dependencyGraphNode,
             ITargetedDependenciesSnapshot targetedSnapshot)
@@ -47,7 +47,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes.V
 
                 Builder.AddGraphNode(
                     graphContext,
-                    projectPath,
+                    projectId,
                     dependencyGraphNode,
                     childDependency.ToViewModel(targetedSnapshot));
             }

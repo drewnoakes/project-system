@@ -27,5 +27,8 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes
             DependencyIdProperty = Schema.Properties.AddNewProperty(DependencyIdPropertyId, typeof(string));
             IsFrameworkAssemblyFolderProperty = Schema.Properties.AddNewProperty(IsFrameworkAssemblyFolderPropertyId, typeof(bool));
         }
+
+        public static readonly GraphNodeIdName ProjectIdName = GraphNodeIdName.Get("ProjectId", "Project ID", typeof(IProjectIdentity));
+        public static readonly GraphNodeIdName DependencyModelIdName = GraphNodeIdName.Get("DependencyModelId", "Dependency Model ID", typeof(string));
     }
 }

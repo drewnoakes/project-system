@@ -22,12 +22,12 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
         {
             set
             {
+                ProjectId = value.ProjectId;
                 ProviderType = value.ProviderType;
                 Name = value.Name;
                 Caption = value.Caption;
                 OriginalItemSpec = value.OriginalItemSpec;
                 Path = value.Path;
-                FullPath = value.FullPath;
                 SchemaName = value.SchemaName;
                 SchemaItemType = value.SchemaItemType;
                 Resolved = value.Resolved;
@@ -45,12 +45,12 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
             }
         }
 
+        public IProjectIdentity ProjectId { get; set; }
         public string ProviderType { get; set; }
         public string Name { get; set; }
         public string Caption { get; set; }
         public string OriginalItemSpec { get; set; }
         public string Path { get; set; }
-        public string FullPath { get; set; }
         public string SchemaName { get; set; }
         public string SchemaItemType { get; set; }
         public bool Resolved { get; set; } = false;

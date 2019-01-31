@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information.
 
-using System;
 using System.Collections.Immutable;
 
 using Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.CrossTarget;
@@ -10,15 +9,9 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
     /// <summary>
     /// Immutable snapshot of all project dependencies across all target frameworks.
     /// </summary>
-    internal interface IDependenciesSnapshot : IEquatable<IDependenciesSnapshot>
+    internal interface IDependenciesSnapshot //: IEquatable<IDependenciesSnapshot>
     {
-        /// <summary>
-        /// Gets the full path to the project file whose dependencies this snapshot contains.
-        /// </summary>
-        /// <remarks>
-        /// Cannot be null or empty.
-        /// </remarks>
-        string ProjectPath { get; }
+        IProjectIdentity ProjectId { get; }
 
         /// <summary>
         /// Gets the active target framework for project (first in the <c>TargetFrameworks</c> property).
