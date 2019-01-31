@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel.Composition;
 
-using Microsoft.VisualStudio.ProjectSystem.VS.Extensibility;
 using Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.CrossTarget;
 
 namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
@@ -18,15 +17,14 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
         private ImmutableDictionary<string, IDependenciesSnapshotProvider> _snapshotProviderByProjectPath
             = ImmutableDictionary.Create<string, IDependenciesSnapshotProvider>(StringComparer.OrdinalIgnoreCase);
 
-        private readonly IProjectExportProvider _projectExportProvider;
+        /// <summary>Used to serialize writes to <see cref="_snapshotProviderByProjectPath"/>.</summary>
+        private readonly object _updateLock = new object();
+
         private readonly ITargetFrameworkProvider _targetFrameworkProvider;
 
         [ImportingConstructor]
-        public AggregateDependenciesSnapshotProvider(
-            IProjectExportProvider projectExportProvider,
-            ITargetFrameworkProvider targetFrameworkProvider)
+        public AggregateDependenciesSnapshotProvider(ITargetFrameworkProvider targetFrameworkProvider)
         {
-            _projectExportProvider = projectExportProvider;
             _targetFrameworkProvider = targetFrameworkProvider;
         }
 
@@ -44,49 +42,70 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
                 return;
             }
 
-            ImmutableInterlocked.Update(
-                ref _snapshotProviderByProjectPath,
-                (dic, provider) => dic.SetItem(provider.CurrentSnapshot.ProjectPath, provider),
-                snapshotProvider);
+            lock (_updateLock)
+            {
+                string projectPath = snapshotProvider.CurrentSnapshot.ProjectPath;
 
-            snapshotProvider.SnapshotRenamed += OnSnapshotRenamed;
-            snapshotProvider.SnapshotChanged += OnSnapshotChanged;
-            snapshotProvider.SnapshotProviderUnloading += OnSnapshotProviderUnloading;
+                _snapshotProviderByProjectPath = _snapshotProviderByProjectPath.Add(projectPath, snapshotProvider);
+
+                snapshotProvider.SnapshotChanged += OnSnapshotChanged;
+                snapshotProvider.ProjectPathChanged += OnProjectPathChanged;
+                snapshotProvider.SnapshotProviderUnloading += OnSnapshotProviderUnloading;
+            }
 
             void OnSnapshotProviderUnloading(object sender, SnapshotProviderUnloadingEventArgs e)
             {
                 // Project has unloaded, so remove it from the cache and unregister event handlers
                 SnapshotProviderUnloading?.Invoke(this, e);
 
-                ImmutableInterlocked.Update(
-                    ref _snapshotProviderByProjectPath,
-                    (dic, projectPath) => dic.Remove(projectPath),
-                    snapshotProvider.CurrentSnapshot.ProjectPath);
+                lock (_updateLock)
+                {
+                    bool removed = ImmutableInterlocked.TryRemove(
+                        ref _snapshotProviderByProjectPath,
+                        snapshotProvider.CurrentSnapshot.ProjectPath,
+                        out IDependenciesSnapshotProvider removedProvider);
 
-                snapshotProvider.SnapshotRenamed -= OnSnapshotRenamed;
-                snapshotProvider.SnapshotChanged -= OnSnapshotChanged;
-                snapshotProvider.SnapshotProviderUnloading -= OnSnapshotProviderUnloading;
+                    if (removed)
+                    {
+                        Assumes.True(ReferenceEquals(snapshotProvider, removedProvider), "Unexpected provider removed from map");
+
+                        snapshotProvider.SnapshotChanged -= OnSnapshotChanged;
+                        snapshotProvider.ProjectPathChanged -= OnProjectPathChanged;
+                        snapshotProvider.SnapshotProviderUnloading -= OnSnapshotProviderUnloading;
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.Fail(
+                            $"Received {nameof(snapshotProvider.SnapshotProviderUnloading)} for unknown project: {snapshotProvider.CurrentSnapshot.ProjectPath}");
+                    }
+                }
             }
 
-            void OnSnapshotRenamed(object sender, ProjectRenamedEventArgs e)
+            void OnProjectPathChanged(object sender, ProjectPathChangedEventArgs e)
             {
-                // Remove and re-add provider with new project path
-                ImmutableInterlocked.Update(
-                    ref _snapshotProviderByProjectPath,
-                    (dic, args) =>
-                    {
-                        if (dic.TryGetValue(args.OldFullPath, out IDependenciesSnapshotProvider provider))
-                        {
-                            dic = dic.Remove(args.OldFullPath);
-                            if (!string.IsNullOrEmpty(args.NewFullPath))
-                            {
-                                dic = dic.SetItem(args.NewFullPath, provider);
-                            }
-                        }
+                // The project path has changed, so update the key under which the provider is kept
+                lock (_updateLock)
+                {
+                    ImmutableDictionary<string, IDependenciesSnapshotProvider> dic = _snapshotProviderByProjectPath;
 
-                        return dic;
-                    },
-                    e);
+                    if (dic.TryGetValue(e.OldPath, out IDependenciesSnapshotProvider provider))
+                    {
+                        System.Diagnostics.Debug.Assert(
+                            ReferenceEquals(e.SnapshotProvider, provider),
+                            $"Received {nameof(snapshotProvider.ProjectPathChanged)} for incorrect provider");
+
+                        dic = dic
+                            .Remove(e.OldPath)
+                            .SetItem(e.NewPath, provider);
+
+                        _snapshotProviderByProjectPath = dic;
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.Fail(
+                            $"Received {nameof(snapshotProvider.ProjectPathChanged)} for unknown project path (within lock): {e.OldPath}");
+                    }
+                }
             }
 
             void OnSnapshotChanged(object sender, SnapshotChangedEventArgs e)
@@ -103,12 +122,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Snapshot
 
             if (!_snapshotProviderByProjectPath.TryGetValue(projectFilePath, out IDependenciesSnapshotProvider snapshotProvider))
             {
-                snapshotProvider = _projectExportProvider.GetExport<IDependenciesSnapshotProvider>(projectFilePath);
-
-                if (snapshotProvider != null)
-                {
-                    RegisterSnapshotProvider(snapshotProvider);
-                }
+                // BUG we end up in here when the project has been renamed and the previous path is being remembered elsewhere
             }
 
             return snapshotProvider?.CurrentSnapshot;

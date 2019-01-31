@@ -123,6 +123,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.GraphNodes
                         continue;
                     }
 
+                    // BUG after a project rename, graph nodes have outdated paths and we receive null
                     IDependenciesSnapshot updatedSnapshot = _aggregateSnapshotProvider.GetSnapshot(nodeProjectPath);
 
                     IDependency updatedDependency = updatedSnapshot?.FindDependency(existingDependencyId);

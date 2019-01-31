@@ -27,7 +27,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Subscription
     {
         public const string DependencySubscriptionsHostContract = "DependencySubscriptionsHostContract";
 
-        public event EventHandler<ProjectRenamedEventArgs> SnapshotRenamed;
+        public event EventHandler<ProjectPathChangedEventArgs> ProjectPathChanged;
         public event EventHandler<SnapshotChangedEventArgs> SnapshotChanged;
         public event EventHandler<SnapshotProviderUnloadingEventArgs> SnapshotProviderUnloading;
 
@@ -247,7 +247,8 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Subscription
 
         private Task OnUnconfiguredProjectRenamedAsync(object sender, ProjectRenamedEventArgs e)
         {
-            SnapshotRenamed?.Invoke(this, e);
+            // Update the snapshot with the new project path
+            TryUpdateSnapshot(snapshot => snapshot.WithProjectPath(e.NewFullPath));
 
             return Task.CompletedTask;
         }
@@ -519,14 +520,38 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Subscription
         {
             lock (_snapshotLock)
             {
-                DependenciesSnapshot updatedSnapshot = updateFunc(_currentSnapshot);
+                DependenciesSnapshot oldSnapshot = _currentSnapshot;
+                DependenciesSnapshot newSnapshot = updateFunc(oldSnapshot);
 
-                if (ReferenceEquals(_currentSnapshot, updatedSnapshot))
+                Assumes.NotNull(newSnapshot);
+
+                if (ReferenceEquals(oldSnapshot, newSnapshot))
                 {
                     return;
                 }
 
-                _currentSnapshot = updatedSnapshot;
+                _currentSnapshot = newSnapshot;
+
+                if (!StringComparers.Paths.Equals(oldSnapshot.ProjectPath, newSnapshot.ProjectPath))
+                {
+                    // The project path has changed, which we need to report immediately so that consumers
+                    // keying data by project path can maintain consistency.
+                    //
+                    // TODO keying data by a value that can change over time (project path) is a recipe for complexity and errors
+                    // - AggregateDependenciesSnapshotProvider does this (and tries to update via ProjectPathChanged)
+                    // - Graph nodes use node.Id.GetValue(CodeGraphNodeIdName.Assembly) for the project name TODO does this update automatically?
+                    //
+                    // The sequence of actions is:
+                    //
+                    // - Update the snapshot (done above)
+                    // - Raise the path change event
+                    // - Raise the snapshot change event immediately after (no debouncing)
+                    // - Return without scheduling further updates
+
+                    ProjectPathChanged?.Invoke(this, new ProjectPathChangedEventArgs(oldSnapshot.ProjectPath, newSnapshot.ProjectPath, this));
+                    SnapshotChanged?.Invoke(this, new SnapshotChangedEventArgs(newSnapshot, token));
+                    return;
+                }
             }
 
             // Conflate rapid snapshot updates by debouncing events over a short window.
@@ -542,7 +567,11 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Subscription
                     // Always publish the latest snapshot
                     IDependenciesSnapshot snapshot = _currentSnapshot;
 
-                    SnapshotChanged?.Invoke(this, new SnapshotChangedEventArgs(snapshot, ct));
+                    // Lock to prevent concurrent invocation of the change event
+                    lock (_snapshotLock)
+                    {
+                        SnapshotChanged?.Invoke(this, new SnapshotChangedEventArgs(snapshot, ct));
+                    }
 
                     return Task.CompletedTask;
                 }, token);
