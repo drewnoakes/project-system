@@ -12,16 +12,28 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.CrossTarget
     [ProjectSystemContract(ProjectSystemContractScope.UnconfiguredProject, ProjectSystemContractProvider.Private, Cardinality = ImportCardinality.ZeroOrMore, ContractName = DependencyRulesSubscriber.DependencyRulesSubscriberContract)]
     internal interface IDependenciesRuleHandler
     {
-        /// <summary>
-        /// Gets the set of rule names this handler handles.
-        /// </summary>
-        ImmutableHashSet<string> GetRuleNames(RuleHandlerType handlerType);
+        ///// <summary>
+        ///// Gets the set of rule names this handler handles.
+        ///// </summary>
+        //ImmutableHashSet<string> GetRuleNames(RuleHandlerType handlerType);
+
+        string UnresolvedRuleName { get; }
+        string ResolvedRuleName { get; }
 
         /// <summary>
         /// Handles the specified set of changes to a rule, and applies them
         /// to the given <see cref="CrossTargetDependenciesChangesBuilder"/>.
         /// </summary>
-        void Handle(
+        void HandleEvaluationData(
+            IImmutableDictionary<string, IProjectChangeDescription> changesByRuleName,
+            ITargetFramework targetFramework,
+            CrossTargetDependenciesChangesBuilder changesBuilder);
+
+        /// <summary>
+        /// Handles the specified set of changes to a rule, and applies them
+        /// to the given <see cref="CrossTargetDependenciesChangesBuilder"/>.
+        /// </summary>
+        void HandleDesignTimeData(
             IImmutableDictionary<string, IProjectChangeDescription> changesByRuleName,
             ITargetFramework targetFramework,
             CrossTargetDependenciesChangesBuilder changesBuilder);

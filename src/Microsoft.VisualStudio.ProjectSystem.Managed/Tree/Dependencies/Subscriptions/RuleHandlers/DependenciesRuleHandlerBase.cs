@@ -16,11 +16,11 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Subscription
         : IDependenciesRuleHandler,
           IProjectDependenciesSubTreeProviderInternal
     {
-        private readonly ImmutableHashSet<string> _evaluationRuleNames;
-        private readonly ImmutableHashSet<string> _designTimeBuildRuleNames;
+        //private readonly ImmutableHashSet<string> _evaluationRuleNames;
+        //private readonly ImmutableHashSet<string> _designTimeBuildRuleNames;
 
-        protected string UnresolvedRuleName { get; }
-        protected string ResolvedRuleName { get; }
+        public string UnresolvedRuleName { get; }
+        public string ResolvedRuleName { get; }
 
         protected DependenciesRuleHandlerBase(
             string unresolvedRuleName,
@@ -29,23 +29,39 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Subscription
             UnresolvedRuleName = unresolvedRuleName;
             ResolvedRuleName = resolvedRuleName;
 
-            _evaluationRuleNames = ImmutableStringHashSet.EmptyOrdinal.Add(unresolvedRuleName);
-            _designTimeBuildRuleNames = _evaluationRuleNames.Add(resolvedRuleName);
+            //_evaluationRuleNames = ImmutableStringHashSet.EmptyOrdinal.Add(unresolvedRuleName);
+            //_designTimeBuildRuleNames = _evaluationRuleNames.Add(resolvedRuleName);
         }
 
         #region IDependenciesRuleHandler
 
-        public ImmutableHashSet<string> GetRuleNames(RuleHandlerType handlerType)
+        //public ImmutableHashSet<string> GetRuleNames(RuleHandlerType handlerType)
+        //{
+        //    switch (handlerType)
+        //    {
+        //        case RuleHandlerType.Evaluation:
+        //            return _evaluationRuleNames;
+        //        case RuleHandlerType.DesignTimeBuild:
+        //            return _designTimeBuildRuleNames;
+        //        default:
+        //            return ImmutableStringHashSet.EmptyOrdinal;
+        //    }
+        //}
+
+        public void HandleEvaluationData(
+            IImmutableDictionary<string, IProjectChangeDescription> changesByRuleName,
+            ITargetFramework targetFramework,
+            CrossTargetDependenciesChangesBuilder changesBuilder)
         {
-            switch (handlerType)
-            {
-                case RuleHandlerType.Evaluation:
-                    return _evaluationRuleNames;
-                case RuleHandlerType.DesignTimeBuild:
-                    return _designTimeBuildRuleNames;
-                default:
-                    return ImmutableStringHashSet.EmptyOrdinal;
-            }
+            // TODO
+        }
+
+        public void HandleDesignTimeData(
+            IImmutableDictionary<string, IProjectChangeDescription> changesByRuleName,
+            ITargetFramework targetFramework,
+            CrossTargetDependenciesChangesBuilder changesBuilder)
+        {
+            // TODO
         }
 
         public abstract ImageMoniker GetImplicitIcon();

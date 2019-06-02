@@ -4,7 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel.Composition;
-using System.Linq;
+//using System.Linq;
+//using System.Reflection.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
@@ -126,7 +127,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Subscription
             _subscriptions.AddDisposable(
                 subscriptionService.JointRuleSource.SourceBlock.LinkTo(
                     intermediateBlockDesignTime,
-                    ruleNames: watchedDesignTimeBuildRules.Union(watchedEvaluationRules),
+                    ruleNames: watchedDesignTimeBuildRules, //.Union(watchedEvaluationRules),
                     suppressVersionOnlyUpdates: true,
                     linkOptions: DataflowOption.PropagateCompletion));
 
@@ -170,9 +171,19 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Subscription
 
         private IReadOnlyCollection<string> GetWatchedRules(RuleHandlerType handlerType)
         {
-            return new HashSet<string>(
-                _handlers.SelectMany(h => h.Value.GetRuleNames(handlerType)),
-                StringComparers.RuleNames);
+            var rules = new HashSet<string>(capacity: _handlers.Count * 2);
+
+            foreach (Lazy<IDependenciesRuleHandler, IOrderPrecedenceMetadataView> handler in _handlers)
+            {
+                rules.Add(handlerType == RuleHandlerType.Evaluation
+                    ? handler.Value.UnresolvedRuleName
+                    : handler.Value.ResolvedRuleName);
+            }
+
+            return rules;
+            //return new HashSet<string>(
+            //    _handlers.SelectMany(h => h.Value.GetRuleNames(handlerType)),
+            //    StringComparers.RuleNames);
         }
 
         private async Task OnProjectChangedAsync(
@@ -210,6 +221,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Subscription
             RuleHandlerType handlerType)
         {
             AggregateCrossTargetProjectContext? currentAggregateContext = await _host!.GetCurrentAggregateProjectContextAsync();
+
             if (currentAggregateContext == null || _currentProjectContext != currentAggregateContext)
             {
                 return;
@@ -235,20 +247,36 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Subscription
             var changesBuilder = new CrossTargetDependenciesChangesBuilder();
 
             // Give each handler a chance to register dependency changes.
-            foreach (Lazy<IDependenciesRuleHandler, IOrderPrecedenceMetadataView> handler in _handlers)
+            if (handlerType == RuleHandlerType.Evaluation)
             {
-                ImmutableHashSet<string> handlerRules = handler.Value.GetRuleNames(handlerType);
-
-                // Slice project changes to include only rules the handler claims an interest in.
-                var projectChanges = projectUpdate.ProjectChanges
-                    .Where(x => handlerRules.Contains(x.Key))
-                    .ToImmutableDictionary();
-
-                if (projectChanges.Any(x => x.Value.Difference.AnyChanges))
+                foreach (Lazy<IDependenciesRuleHandler, IOrderPrecedenceMetadataView> handler in _handlers)
                 {
-                    handler.Value.Handle(projectChanges, targetFrameworkToUpdate, changesBuilder);
+                    handler.Value.HandleEvaluationData(projectUpdate.ProjectChanges, targetFrameworkToUpdate, changesBuilder);
                 }
             }
+            else
+            {
+                foreach (Lazy<IDependenciesRuleHandler, IOrderPrecedenceMetadataView> handler in _handlers)
+                {
+                    handler.Value.HandleDesignTimeData(projectUpdate.ProjectChanges, targetFrameworkToUpdate, changesBuilder);
+                }
+            }
+
+            //// Give each handler a chance to register dependency changes.
+            //foreach (Lazy<IDependenciesRuleHandler, IOrderPrecedenceMetadataView> handler in _handlers)
+            //{
+            //    ImmutableHashSet<string> handlerRules = handler.Value.GetRuleNames(handlerType);
+
+            //    // Slice project changes to include only rules the handler claims an interest in.
+            //    var projectChanges = projectUpdate.ProjectChanges
+            //        .Where(x => handlerRules.Contains(x.Key))
+            //        .ToImmutableDictionary();
+
+            //    if (projectChanges.Any(x => x.Value.Difference.AnyChanges))
+            //    {
+            //        handler.Value.Handle(projectChanges, targetFrameworkToUpdate, changesBuilder);
+            //    }
+            //}
 
             ImmutableDictionary<ITargetFramework, IDependenciesChanges>? changes = changesBuilder.TryBuildChanges();
 
