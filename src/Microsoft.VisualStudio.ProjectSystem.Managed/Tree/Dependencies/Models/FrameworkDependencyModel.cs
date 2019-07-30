@@ -25,7 +25,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Models
 
         public override string? SchemaItemType => FrameworkReference.PrimaryDataSourceItemType;
 
-        public override string? SchemaName => Resolved ? ResolvedFrameworkReference.SchemaName : FrameworkReference.SchemaName;
+        public override string? SchemaName => "FrameworkReferenceBrowseObject";
 
         public FrameworkDependencyModel(
             string path,

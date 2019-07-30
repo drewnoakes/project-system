@@ -78,6 +78,7 @@
       <DependentUpon>FrameworkReference.xaml</DependentUpon>
     </Compile>
     <XamlPropertyRule Include="ProjectSystem\Rules\Dependencies\FrameworkReference.xaml">
+      <XlfInput>false</XlfInput>
       <Generator>MSBuild:GenerateRuleSourceFromXaml</Generator>
       <SubType>Designer</SubType>
     </XamlPropertyRule>
@@ -85,9 +86,11 @@
       <DependentUpon>ResolvedFrameworkReference.xaml</DependentUpon>
     </Compile>
     <XamlPropertyRule Include="ProjectSystem\Rules\Dependencies\ResolvedFrameworkReference.xaml">
+      <XlfInput>false</XlfInput>
       <Generator>MSBuild:GenerateRuleSourceFromXaml</Generator>
       <SubType>Designer</SubType>
     </XamlPropertyRule>
+    <XamlPropertyRuleNoCodeBehind Include="ProjectSystem\Rules\Dependencies\FrameworkReference.BrowseObject.xaml" />
 
     <!-- Package Reference -->
     <Compile Update="ProjectSystem\Rules\Dependencies\PackageReference.cs">

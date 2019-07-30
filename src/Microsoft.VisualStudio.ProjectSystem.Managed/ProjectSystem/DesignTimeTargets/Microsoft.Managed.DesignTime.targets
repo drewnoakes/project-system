@@ -305,11 +305,15 @@
 
     <!-- Framework references -->
     <PropertyPageSchema Include="$(ManagedXamlResourcesDirectory)FrameworkReference.xaml">
-      <Context>Project;BrowseObject</Context>
+      <Context>Project</Context>
     </PropertyPageSchema>
 
     <PropertyPageSchema Include="$(ManagedXamlResourcesDirectory)ResolvedFrameworkReference.xaml">
-      <Context>ProjectSubscriptionService;BrowseObject</Context>
+      <Context>ProjectSubscriptionService</Context>
+    </PropertyPageSchema>
+
+    <PropertyPageSchema Include="$(ManagedXamlResourcesDirectory)FrameworkReference.BrowseObject.xaml">
+      <Context>BrowseObject</Context>
     </PropertyPageSchema>
 
     <PropertyPageSchema Include="$(ManagedXamlNeutralResourcesDirectory)CollectedFrameworkReference.xaml">
