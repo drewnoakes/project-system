@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+
 using Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Models;
 using Microsoft.VisualStudio.ProjectSystem.VS.Utilities;
 using Microsoft.VisualStudio.Text;
@@ -46,6 +47,19 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Subscription
                 Properties = properties;
             }
 
+            // TODO split this method into TryGetEvaluatedPackageMetadata and TryGetResolvedPackageMetadata
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="itemSpec">A concatenation of the target framework with the original item spec.</param>
+            /// <param name="isResolved"></param>
+            /// <param name="properties"></param>
+            /// <param name="unresolvedChanges"></param>
+            /// <param name="targetFramework"></param>
+            /// <param name="targetFrameworkProvider"></param>
+            /// <param name="metadata"></param>
+            /// <returns></returns>
             public static bool TryGetMetadata(
                 string itemSpec,
                 bool isResolved,

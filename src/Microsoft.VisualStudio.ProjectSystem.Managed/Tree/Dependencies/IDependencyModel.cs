@@ -26,6 +26,8 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies
         /// </summary>
         string ProviderType { get; }
 
+        // TODO what is Name for? It only seems to be used by packages. Why isn't it the same as 'Caption'?
+
         /// <summary>
         /// Name of the dependency
         /// </summary>

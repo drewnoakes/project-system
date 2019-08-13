@@ -38,6 +38,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.CrossTarget
         void Handle(
             IImmutableDictionary<string, IProjectChangeDescription> changesByRuleName,
             ITargetFramework targetFramework,
-            CrossTargetDependenciesChangesBuilder changesBuilder);
+            CrossTargetDependenciesChangesBuilder changesBuilder,
+            RuleSource source);
     }
 }

@@ -45,7 +45,8 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Tree.Dependencies.Subscription
         public override void Handle(
             IImmutableDictionary<string, IProjectChangeDescription> changesByRuleName,
             ITargetFramework targetFramework,
-            CrossTargetDependenciesChangesBuilder changesBuilder)
+            CrossTargetDependenciesChangesBuilder changesBuilder,
+            RuleSource source)
         {
             var caseInsensitiveUnresolvedChanges = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
