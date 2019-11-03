@@ -10,14 +10,25 @@ using Microsoft.Test.Apex.VisualStudio.Solution;
 
 namespace Microsoft.VisualStudio.ProjectSystem.VS
 {
+    public interface IProject
+    {
+        string ProjectName { get; }
+        string RelativeProjectFilePath { get; }
+        Guid ProjectGuid { get; }
+        object ProjectTypeGuid { get; }
+        ProjectTestExtension? Extension { get; set; }
+
+        void Save(string solutionRoot);
+    }
+
     /// <summary>
     /// Defines a <c>.csproj</c> file to be created when using <see cref="ProjectLayoutTestBase"/>.
     /// </summary>
-    public sealed class Project : IEnumerable   
+    public sealed class Project : IProject, IEnumerable
     {
         private static readonly Guid s_sdkProjectTypeGuid = Guid.Parse("9A19103F-16F7-4668-BE54-9A1E7A4F7556");
 
-        private List<Project>? _referencedProjects;
+        private List<IProject>? _referencedProjects;
         private List<PackageReference>? _packageReferences;
         private List<AssemblyReference>? _assemblyReferences;
         private List<IFile>? _files;
@@ -97,9 +108,9 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS
         /// Adds a P2P (project-to-project) reference from this project to <paramref name="referee"/>.
         /// </summary>
         /// <param name="referee">The project to reference.</param>
-        public void Add(Project referee)
+        public void Add(IProject referee)
         {
-            _referencedProjects ??= new List<Project>();
+            _referencedProjects ??= new List<IProject>();
             _referencedProjects.Add(referee);
         }
 

@@ -13,9 +13,9 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS
     /// </summary>
     public sealed class Solution : IEnumerable
     {
-        private readonly List<Project> _projects = new List<Project>();
+        private readonly List<IProject> _projects = new List<IProject>();
 
-        public IEnumerable<Project> Projects => _projects;
+        public IEnumerable<IProject> Projects => _projects;
 
         public GlobalJson? GlobalJson { get; private set; }
 
@@ -64,7 +64,7 @@ $@"    EndGlobalSection
 EndGlobal");
         }
 
-        public void Add(Project project) => _projects.Add(project);
+        public void Add(IProject project) => _projects.Add(project);
 
         public void Add(GlobalJson globalJson) => GlobalJson = globalJson;
 

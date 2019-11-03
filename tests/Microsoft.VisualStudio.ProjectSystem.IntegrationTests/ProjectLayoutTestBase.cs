@@ -199,7 +199,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS
         /// </summary>
         /// <param name="project"></param>
         /// <returns></returns>
-        protected ProjectTestExtension CreateProject(Project project)
+        protected ProjectTestExtension CreateProject(IProject project)
         {
             var rootPath = CreateRootPath();
 
