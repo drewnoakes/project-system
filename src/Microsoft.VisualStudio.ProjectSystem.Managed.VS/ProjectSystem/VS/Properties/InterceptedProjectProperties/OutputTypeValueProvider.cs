@@ -8,7 +8,9 @@ using Microsoft.VisualStudio.ProjectSystem.Properties;
 
 namespace Microsoft.VisualStudio.ProjectSystem.VS.Properties
 {
-    /// OutputType acts as a converter for the MSBuild OutputType value expressed as <see cref="VSLangProj.prjOutputType"/>.
+    /// <summary>
+    /// Converts the MSBuild <c>OutputType</c> value expressed as <see cref="VSLangProj.prjOutputType"/>.
+    /// </summary>
     [ExportInterceptingPropertyValueProvider("OutputType", ExportInterceptingPropertyValueProviderFile.ProjectFile)]
     internal sealed class OutputTypeValueProvider : OutputTypeValueProviderBase
     {
