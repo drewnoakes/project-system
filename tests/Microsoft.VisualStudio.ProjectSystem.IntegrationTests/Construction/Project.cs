@@ -94,13 +94,13 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS
         }
 
         /// <summary>
-        /// Adds a P2P (project-to-project) reference from this project to <paramref name="referree"/>.
+        /// Adds a P2P (project-to-project) reference from this project to <paramref name="referee"/>.
         /// </summary>
-        /// <param name="referree">The project to reference.</param>
-        public void Add(Project referree)
+        /// <param name="referee">The project to reference.</param>
+        public void Add(Project referee)
         {
             _referencedProjects ??= new List<Project>();
-            _referencedProjects.Add(referree);
+            _referencedProjects.Add(referee);
         }
 
         public void Add(PackageReference packageReference)
