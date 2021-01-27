@@ -60,7 +60,10 @@ namespace Microsoft.VisualStudio.ProjectSystem.Properties
             {
                 _projectThreadingService.RunAndForget(async () =>
                 {
-                    ILaunchSettings launchSettings = await _launchSettingsProvider.WaitForFirstSnapshot(Timeout.Infinite);
+                    ILaunchSettings? launchSettings = await _launchSettingsProvider.WaitForFirstSnapshot(Timeout.Infinite);
+
+                    // We pass an infinite timeout, so this must not be null
+                    Assumes.NotNull(launchSettings);
 
                     var writableLaunchSettings = launchSettings.ToWritableLaunchSettings();
                     var activeProfile = writableLaunchSettings.ActiveProfile;
@@ -80,7 +83,11 @@ namespace Microsoft.VisualStudio.ProjectSystem.Properties
 
         private async Task<string> GetPropertyValueAsync()
         {
-            ILaunchSettings launchSettings = await _launchSettingsProvider.WaitForFirstSnapshot(Timeout.Infinite);
+            ILaunchSettings? launchSettings = await _launchSettingsProvider.WaitForFirstSnapshot(Timeout.Infinite);
+
+            // We pass an infinite timeout, so this must not be null
+            Assumes.NotNull(launchSettings);
+            
             var commandName = launchSettings.ActiveProfile?.CommandName;
             if (commandName == null)
             {

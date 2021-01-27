@@ -45,10 +45,10 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Debug
             {
                 if (_activeProfile != null)
                 {
-                    return Task.FromResult((ILaunchSettings)new LaunchSettings(new List<ILaunchProfile>() { _activeProfile }, null, _activeProfile.Name));
+                    return Task.FromResult((ILaunchSettings?)new LaunchSettings(new List<ILaunchProfile>() { _activeProfile }, null, _activeProfile.Name));
                 }
 
-                return Task.FromResult((ILaunchSettings)new LaunchSettings());
+                return Task.FromResult((ILaunchSettings?)new LaunchSettings());
             });
         }
 

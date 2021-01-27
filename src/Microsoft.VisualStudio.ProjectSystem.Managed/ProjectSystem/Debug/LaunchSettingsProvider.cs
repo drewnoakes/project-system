@@ -134,12 +134,12 @@ namespace Microsoft.VisualStudio.ProjectSystem.Debug
         /// IDebugProfileProvider
         /// Access to the current set of profile information
         /// </summary>
-        public ILaunchSettings CurrentSnapshot
+        public ILaunchSettings? CurrentSnapshot
         {
             get
             {
                 EnsureInitialized();
-                return _currentSnapshot!;
+                return _currentSnapshot;
             }
             protected set
             {
@@ -194,7 +194,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.Debug
             if (projectSnapshot.Value.Item1.CurrentState.TryGetValue(ProjectDebugger.SchemaName, out IProjectRuleSnapshot ruleSnapshot))
             {
                 ruleSnapshot.Properties.TryGetValue(ProjectDebugger.ActiveDebugProfileProperty, out string activeProfile);
-                ILaunchSettings snapshot = CurrentSnapshot;
+                ILaunchSettings? snapshot = CurrentSnapshot;
                 if (snapshot == null || !LaunchProfile.IsSameProfileName(activeProfile, snapshot.ActiveProfile?.Name))
                 {
                     // Updates need to be sequenced
@@ -215,7 +215,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.Debug
         /// </summary>
         protected async Task UpdateActiveProfileInSnapshotAsync(string updatedActiveProfileName)
         {
-            ILaunchSettings snapshot = CurrentSnapshot;
+            ILaunchSettings? snapshot = CurrentSnapshot;
             if (snapshot == null || await SettingsFileHasChangedAsync())
             {
                 await UpdateProfilesAsync(updatedActiveProfileName);
@@ -259,7 +259,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.Debug
                 }
 
                 // If we have a previous snapshot merge in in-memory profiles
-                ILaunchSettings prevSnapshot = CurrentSnapshot;
+                ILaunchSettings? prevSnapshot = CurrentSnapshot;
                 if (prevSnapshot != null)
                 {
                     MergeExistingInMemoryProfiles(launchSettingData, prevSnapshot);
@@ -730,7 +730,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.Debug
         /// This function blocks until a snapshot is available. It will return null if the timeout occurs
         /// prior to the snapshot is available
         /// </summary>
-        public async Task<ILaunchSettings> WaitForFirstSnapshot(int timeout)
+        public async Task<ILaunchSettings?> WaitForFirstSnapshot(int timeout)
         {
             if (CurrentSnapshot != null)
             {
@@ -739,7 +739,6 @@ namespace Microsoft.VisualStudio.ProjectSystem.Debug
 
             await _firstSnapshotCompletionSource.Task.TryWaitForCompleteOrTimeout(timeout);
 
-            Assumes.NotNull(CurrentSnapshot);
             return CurrentSnapshot;
         }
 
@@ -807,7 +806,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.Debug
             return _sequentialTaskQueue.ExecuteTask(async () =>
             {
                 ILaunchSettings currentSettings = await GetSnapshotThrowIfErrors();
-                ILaunchProfile existingProfile = currentSettings.Profiles.FirstOrDefault(p => LaunchProfile.IsSameProfileName(p.Name, profileName));
+                ILaunchProfile? existingProfile = currentSettings.Profiles.FirstOrDefault(p => LaunchProfile.IsSameProfileName(p.Name, profileName));
                 if (existingProfile != null)
                 {
                     ImmutableList<ILaunchProfile> profiles = currentSettings.Profiles.Remove(existingProfile);
@@ -872,7 +871,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.Debug
         /// </summary>
         public async Task<ILaunchSettings> GetSnapshotThrowIfErrors()
         {
-            ILaunchSettings currentSettings = await WaitForFirstSnapshot(WaitForFirstSnapshotDelayMillis);
+            ILaunchSettings? currentSettings = await WaitForFirstSnapshot(WaitForFirstSnapshotDelayMillis);
             if (currentSettings == null || (currentSettings.Profiles.Count == 1 && string.Equals(currentSettings.Profiles[0].CommandName, ErrorProfileCommandName, StringComparisons.LaunchProfileCommandNames)))
             {
                 string fileName = await GetLaunchSettingsFilePathAsync();
