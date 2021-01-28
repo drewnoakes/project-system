@@ -75,6 +75,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies.Snapshot
                 ImmutableDictionary<TargetFramework, TargetedDependenciesSnapshot>.Empty);
         }
 
+#if false
         [Fact]
         public void Constructor_NoThrowIfActiveTargetFrameworkIsUnsupportedAndNotPresentInDependenciesByTargetFramework()
         {
@@ -82,6 +83,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies.Snapshot
                 activeTargetFramework: TargetFramework.Unsupported,
                 ImmutableDictionary<TargetFramework, TargetedDependenciesSnapshot>.Empty);
         }
+#endif
 
         [Fact]
         public void Constructor()

@@ -10,8 +10,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies.CrossTarget
     /// </summary>
     internal sealed class AggregateCrossTargetProjectContext
     {
-        private readonly ImmutableDictionary<string, ConfiguredProject> _configuredProjectByTargetFramework;
-        private readonly ITargetFrameworkProvider _targetFrameworkProvider;
+        private readonly ImmutableDictionary<TargetFramework, ConfiguredProject> _configuredProjectByTargetFramework;
 
         public bool IsCrossTargeting { get; }
         public ImmutableArray<TargetFramework> TargetFrameworks { get; }
@@ -20,9 +19,8 @@ namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies.CrossTarget
         public AggregateCrossTargetProjectContext(
             bool isCrossTargeting,
             ImmutableArray<TargetFramework> targetFrameworks,
-            ImmutableDictionary<string, ConfiguredProject> configuredProjectByTargetFramework,
-            TargetFramework activeTargetFramework,
-            ITargetFrameworkProvider targetFrameworkProvider)
+            ImmutableDictionary<TargetFramework, ConfiguredProject> configuredProjectByTargetFramework,
+            TargetFramework activeTargetFramework)
         {
             Requires.Argument(!targetFrameworks.IsDefaultOrEmpty, nameof(targetFrameworks), "Must contain at least one item.");
             Requires.NotNullOrEmpty(configuredProjectByTargetFramework, nameof(configuredProjectByTargetFramework));
@@ -33,26 +31,30 @@ namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies.CrossTarget
             TargetFrameworks = targetFrameworks;
             _configuredProjectByTargetFramework = configuredProjectByTargetFramework;
             ActiveTargetFramework = activeTargetFramework;
-            _targetFrameworkProvider = targetFrameworkProvider;
         }
 
         public IEnumerable<ConfiguredProject> InnerConfiguredProjects => _configuredProjectByTargetFramework.Values;
 
         public TargetFramework? GetProjectFramework(ProjectConfiguration projectConfiguration)
         {
-            if (projectConfiguration.Dimensions.TryGetValue(ConfigurationGeneral.TargetFrameworkProperty, out string targetFrameworkMoniker))
+            if (projectConfiguration.Dimensions.TryGetValue(ConfigurationGeneral.TargetFrameworkProperty, out string targetFrameworkAlias))
             {
-                return _targetFrameworkProvider.GetTargetFramework(targetFrameworkMoniker);
+                foreach (TargetFramework targetFramework in TargetFrameworks)
+                {
+                    if (StringComparers.FrameworkIdentifiers.Equals(targetFramework.TargetFrameworkAlias, targetFrameworkAlias))
+                    {
+                        return targetFramework;
+                    }
+                }
             }
-            else
-            {
-                return TargetFrameworks.Length > 1 ? null : TargetFrameworks[0];
-            }
+
+            return TargetFrameworks.Length > 1 ? null : TargetFrameworks[0];
         }
 
         public ConfiguredProject? GetInnerConfiguredProject(TargetFramework target)
         {
-            return _configuredProjectByTargetFramework.FirstOrDefault((x, t) => t.Equals(x.Key), target).Value;
+            _configuredProjectByTargetFramework.TryGetValue(target, out ConfiguredProject? value);
+            return value;
         }
     }
 }

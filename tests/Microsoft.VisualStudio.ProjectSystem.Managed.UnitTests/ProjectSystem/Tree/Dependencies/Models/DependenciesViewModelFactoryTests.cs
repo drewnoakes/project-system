@@ -14,7 +14,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies.Models
         public void CreateTargetViewModel_NoUnresolvedDependency()
         {
             var project = UnconfiguredProjectFactory.Create();
-            var targetFramework = new TargetFramework(moniker: "tFm1");
+            var targetFramework = new TargetFramework(alias: "tFm1");
 
             var factory = new DependenciesViewModelFactory(project);
 
@@ -32,7 +32,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies.Models
         public void CreateTargetViewModel_HasUnresolvedDependency()
         {
             var project = UnconfiguredProjectFactory.Create();
-            var targetFramework = new TargetFramework(moniker: "tFm1");
+            var targetFramework = new TargetFramework(alias: "tFm1");
 
             var factory = new DependenciesViewModelFactory(project);
 

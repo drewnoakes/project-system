@@ -32,7 +32,6 @@ namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies.Subscriptions
         private readonly SnapshotUpdater _snapshot;
         private readonly ContextTracker _context;
 
-        private readonly ITargetFrameworkProvider _targetFrameworkProvider;
         private readonly IUnconfiguredProjectCommonServices _commonServices;
         private readonly IUnconfiguredProjectTasksService _tasksService;
         private readonly IActiveConfiguredProjectSubscriptionService _activeConfiguredProjectSubscriptionService;
@@ -68,14 +67,12 @@ namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies.Subscriptions
             IUnconfiguredProjectTasksService tasksService,
             IActiveConfiguredProjectSubscriptionService activeConfiguredProjectSubscriptionService,
             IActiveProjectConfigurationRefreshService activeProjectConfigurationRefreshService,
-            ITargetFrameworkProvider targetFrameworkProvider,
             IDependencyTreeTelemetryService dependencyTreeTelemetryService)
             : base(commonServices.ThreadingService.JoinableTaskContext)
         {
             _commonServices = commonServices;
             _tasksService = tasksService;
             _activeConfiguredProjectSubscriptionService = activeConfiguredProjectSubscriptionService;
-            _targetFrameworkProvider = targetFrameworkProvider;
             _dependencyTreeTelemetryService = dependencyTreeTelemetryService;
 
             _dependencySubscribers = new OrderPrecedenceImportCollection<IDependencyCrossTargetSubscriber>(
@@ -89,7 +86,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies.Subscriptions
                 ImportOrderPrecedenceComparer.PreferenceOrder.PreferredComesLast,
                 projectCapabilityCheckProvider: commonServices.Project);
 
-            _context = new ContextTracker(targetFrameworkProvider, commonServices, contextProvider, activeProjectConfigurationRefreshService);
+            _context = new ContextTracker(commonServices, contextProvider, activeProjectConfigurationRefreshService);
 
             _snapshot = new SnapshotUpdater(commonServices.ThreadingService, tasksService.UnloadCancellationToken);
 
@@ -239,9 +236,9 @@ namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies.Subscriptions
                 }
 
                 TargetFramework targetFramework =
-                    Strings.IsNullOrEmpty(e.TargetShortOrFullName) || TargetFramework.Any.Equals(e.TargetShortOrFullName)
+                    Strings.IsNullOrEmpty(e.TargetShortOrFullName) || StringComparers.FrameworkIdentifiers.Equals(TargetFramework.Any.TargetFrameworkAlias, e.TargetShortOrFullName)
                         ? TargetFramework.Any
-                        : _targetFrameworkProvider.GetTargetFramework(e.TargetShortOrFullName) ?? TargetFramework.Any;
+                        : _snapshot.Current.DependenciesByTargetFramework.Keys.FirstOrDefault(tf => tf.TargetFrameworkAlias == e.TargetShortOrFullName) ?? TargetFramework.Any;
 
                 UpdateDependenciesSnapshot(targetFramework, e.Changes, catalogs: null, targetFrameworks: default, activeTargetFramework: null, e.Token);
             }

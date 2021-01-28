@@ -32,13 +32,10 @@ namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies.Subscriptions.R
                 implicitExpandedIcon: KnownMonikers.NuGetNoColorPrivate),
             DependencyTreeFlags.PackageDependencyGroup);
 
-        private readonly ITargetFrameworkProvider _targetFrameworkProvider;
-
         [ImportingConstructor]
-        public PackageRuleHandler(ITargetFrameworkProvider targetFrameworkProvider)
+        public PackageRuleHandler()
             : base(PackageReference.SchemaName, ResolvedPackageReference.SchemaName)
         {
-            _targetFrameworkProvider = targetFrameworkProvider;
         }
 
         public override string ProviderType => ProviderTypeString;
@@ -181,9 +178,9 @@ namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies.Subscriptions.R
                     int slashIndex = itemSpec.IndexOf('/');
                     if (slashIndex != -1)
                     {
-                        string targetFrameworkName = s_targetFrameworkInternPool.Intern(itemSpec.Substring(0, slashIndex));
+                        string targetFrameworkMoniker = s_targetFrameworkInternPool.Intern(itemSpec.Substring(0, slashIndex));
 
-                        if (_targetFrameworkProvider.GetTargetFramework(targetFrameworkName)?.Equals(targetFramework) != true)
+                        if (StringComparers.FrameworkIdentifiers.Equals(targetFramework.TargetFrameworkMoniker, targetFrameworkMoniker))
                         {
                             // Item is not for the correct target
                             dependencyModel = null;

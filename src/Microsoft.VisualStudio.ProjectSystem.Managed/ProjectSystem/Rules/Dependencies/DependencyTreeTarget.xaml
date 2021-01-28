@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- Licensed to the .NET Foundation under one or more agreements. The .NET Foundation licenses this file to you under the MIT license. See the LICENSE.md file in the project root for more information. -->
+<Rule Name="DependencyTreeTarget"
+      Description="Target Framework Properties"
+      DisplayName="Target Framework"
+      PageTemplate="generic"
+      xmlns="http://schemas.microsoft.com/build/2009/properties">
+  
+  <Rule.DataSource>
+    <!--
+    ItemType="SDKReference"
+                MSBuildTarget="CollectResolvedSDKReferencesDesignTime"
+    -->
+    <DataSource HasConfigurationCondition="False"
+                Persistence="ProjectFile"
+                SourceOfDefaultValue="AfterContext"
+                SourceType="Property" />
+  </Rule.DataSource>
+
+  <StringProperty Name="TargetFramework"
+                  DisplayName="Target framework alias"
+                  ReadOnly="True" />
+
+  <StringProperty Name="TargetFrameworkMoniker"
+                  DisplayName="Target framework moniker"
+                  ReadOnly="True" />
+
+  <StringProperty Name="TargetFrameworkIdentifier"
+                  DisplayName="Target framework identifier"
+                  ReadOnly="True" />
+
+  <StringProperty Name="TargetFrameworkVersion"
+                  DisplayName="Target framework version"
+                  ReadOnly="True" />
+
+  <StringProperty Name="TargetFrameworkProfile"
+                  DisplayName="Target framework profile"
+                  ReadOnly="True" />
+
+  <StringProperty Name="Platform"
+                  DisplayName="Platform alias"
+                  ReadOnly="True" />
+
+  <StringProperty Name="TargetPlatformIdentifier"
+                  DisplayName="Target platform identifier"
+                  ReadOnly="True" />
+
+  <StringProperty Name="TargetPlatformVersion"
+                  DisplayName="Target platform version"
+                  ReadOnly="True" />
+
+</Rule>

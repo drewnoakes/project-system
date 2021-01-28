@@ -13,6 +13,7 @@ using Microsoft.VisualStudio.IO;
 using Microsoft.VisualStudio.ProjectSystem.Build;
 using Microsoft.VisualStudio.ProjectSystem.Properties;
 using Microsoft.VisualStudio.Telemetry;
+using Microsoft.VisualStudio.Threading;
 
 namespace Microsoft.VisualStudio.ProjectSystem.UpToDate
 {
@@ -571,6 +572,9 @@ namespace Microsoft.VisualStudio.ProjectSystem.UpToDate
 
             // Start the stopwatch now, so we include any lock acquisition in the timing
             var sw = Stopwatch.StartNew();
+
+            // Get off the UI thread
+            await TaskScheduler.Default;
 
             Subscription subscription = Volatile.Read(ref _subscription);
 

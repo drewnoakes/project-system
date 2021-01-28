@@ -375,7 +375,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies
 
                 if (!cancellationToken.IsCancellationRequested)
                 {
-                    dependenciesNode = await viewProvider.BuildTreeAsync(dependenciesNode, snapshot, cancellationToken);
+                    dependenciesNode = await viewProvider.BuildTreeAsync(dependenciesNode, snapshot, configuredProjectExports?.RuleFactory, UnconfiguredProject, cancellationToken);
 
                     await _treeTelemetryService.ObserveTreeUpdateCompletedAsync(snapshot.MaximumVisibleDiagnosticLevel != DiagnosticLevel.None);
                 }

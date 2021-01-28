@@ -6,6 +6,7 @@ using System.Collections.Immutable;
 using System.ComponentModel.Composition;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.Framework.XamlTypes;
 using Microsoft.VisualStudio.ProjectSystem.Properties;
 using Microsoft.VisualStudio.ProjectSystem.References;
 using Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies.Models;
@@ -51,6 +52,8 @@ namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies
         public async Task<IProjectTree> BuildTreeAsync(
             IProjectTree dependenciesTree,
             DependenciesSnapshot snapshot,
+            IRuleFactory? ruleFactory,
+            UnconfiguredProject unconfiguredProject,
             CancellationToken cancellationToken = default)
         {
             // Keep a reference to the original tree to return in case we are cancelled.
@@ -120,10 +123,44 @@ namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies
                         bool shouldAddTargetNode = node == null;
                         IDependencyViewModel targetViewModel = _viewModelFactory.CreateTargetViewModel(targetedSnapshot.TargetFramework, targetedSnapshot.MaximumVisibleDiagnosticLevel);
 
+                        IRule? rule = null;
+
+                        if (ruleFactory != null &&
+                            targetedSnapshot.Catalogs != null && 
+                            targetedSnapshot.Catalogs.NamedCatalogs.TryGetValue(PropertyPageContexts.BrowseObject, out IPropertyPagesCatalog? browseObjectsCatalog))
+                        {
+                            const string schemaName = DependencyTreeTarget.SchemaName;
+
+                            Rule? schema = browseObjectsCatalog.GetSchema(schemaName);
+
+                            if (schema != null)
+                            {
+                                var context = ProjectPropertiesContext.GetContext(
+                                    unconfiguredProject,
+                                    itemType: schemaName,
+                                    itemName: targetFramework.TargetFrameworkMoniker);
+
+                                var browseObjectProperties = ImmutableDictionary<string, string>.Empty
+                                    .Add(DependencyTreeTarget.TargetFrameworkProperty, targetedSnapshot.TargetFramework.TargetFrameworkAlias)
+                                    .Add(DependencyTreeTarget.TargetFrameworkMonikerProperty, targetedSnapshot.TargetFramework.TargetFrameworkMoniker ?? "")
+                                    .Add(DependencyTreeTarget.TargetFrameworkIdentifierProperty, targetedSnapshot.TargetFramework.TargetFrameworkIdentifier ?? "")
+                                    .Add(DependencyTreeTarget.TargetFrameworkVersionProperty, targetedSnapshot.TargetFramework.TargetFrameworkVersion ?? "")
+                                    .Add(DependencyTreeTarget.TargetFrameworkProfileProperty, targetedSnapshot.TargetFramework.TargetFrameworkProfile ?? "")
+                                    .Add(DependencyTreeTarget.TargetPlatformIdentifierProperty, targetedSnapshot.TargetFramework.TargetPlatformIdentifier ?? "")
+                                    .Add(DependencyTreeTarget.TargetPlatformVersionProperty, targetedSnapshot.TargetFramework.TargetPlatformVersion ?? "");
+
+                                rule = ruleFactory.CreateResolvedReferencePageRule(
+                                    schema,
+                                    context,
+                                    resolvedItemName: targetedSnapshot.TargetFramework.TargetFrameworkMoniker ?? targetedSnapshot.TargetFramework.TargetFrameworkAlias,
+                                    browseObjectProperties);
+                            }
+                        }
+
                         node = CreateOrUpdateNode(
                             node,
                             targetViewModel,
-                            browseObjectProperties: null,
+                            browseObjectProperties: rule,
                             isProjectItem: false,
                             additionalFlags: ProjectTreeFlags.Create(ProjectTreeFlags.Common.BubbleUp));
 

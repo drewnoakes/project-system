@@ -25,6 +25,17 @@
 
   <!-- Dependencies -->
   <ItemGroup>
+    <!-- Target Framework node -->
+    <Compile Update="ProjectSystem\Rules\Dependencies\DependencyTreeTarget.cs">
+      <DependentUpon>DependencyTreeTarget.xaml</DependentUpon>
+    </Compile>
+    <XamlPropertyRule Include="ProjectSystem\Rules\Dependencies\DependencyTreeTarget.xaml">
+      <Generator>MSBuild:GenerateRuleSourceFromXaml</Generator>
+      <SubType>Designer</SubType>
+      <DataAccess>None</DataAccess>
+      <RuleInjection>None</RuleInjection>
+    </XamlPropertyRule>
+
     <!-- Analyzer Reference -->
     <Compile Update="ProjectSystem\Rules\Dependencies\AnalyzerReference.xaml.cs">
       <DependentUpon>AnalyzerReference.xaml</DependentUpon>

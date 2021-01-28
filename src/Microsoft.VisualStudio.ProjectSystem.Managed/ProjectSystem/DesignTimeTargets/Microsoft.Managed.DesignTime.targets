@@ -225,6 +225,11 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(DefineCommonManagedReferenceSchemas)' == 'true'">
+    <!-- Target Framework node -->
+    <PropertyPageSchema Include="$(ManagedXamlResourcesDirectory)DependencyTreeTarget.xaml">
+      <Context>BrowseObject</Context>
+    </PropertyPageSchema>
+
     <!-- Assembly references -->
     <PropertyPageSchema Include="$(ManagedXamlResourcesDirectory)AssemblyReference.xaml">
       <Context>Project;BrowseObject</Context>

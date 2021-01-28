@@ -17,23 +17,19 @@ namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies.Subscriptions
         /// </summary>
         private sealed class ContextTracker
         {
-            private readonly ITargetFrameworkProvider _targetFrameworkProvider;
             private readonly IUnconfiguredProjectCommonServices _commonServices;
             private readonly Lazy<AggregateCrossTargetProjectContextProvider> _contextProvider;
             private readonly IActiveProjectConfigurationRefreshService _activeProjectConfigurationRefreshService;
 
             public ContextTracker(
-                ITargetFrameworkProvider targetFrameworkProvider,
                 IUnconfiguredProjectCommonServices commonServices,
                 Lazy<AggregateCrossTargetProjectContextProvider> contextProvider,
                 IActiveProjectConfigurationRefreshService activeProjectConfigurationRefreshService)
             {
-                Requires.NotNull(targetFrameworkProvider, nameof(targetFrameworkProvider));
                 Requires.NotNull(commonServices, nameof(commonServices));
                 Requires.NotNull(contextProvider, nameof(contextProvider));
                 Requires.NotNull(activeProjectConfigurationRefreshService, nameof(activeProjectConfigurationRefreshService));
 
-                _targetFrameworkProvider = targetFrameworkProvider;
                 _commonServices = commonServices;
                 _contextProvider = contextProvider;
                 _activeProjectConfigurationRefreshService = activeProjectConfigurationRefreshService;
@@ -68,16 +64,15 @@ namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies.Subscriptions
 
                     if (!previousContext.IsCrossTargeting)
                     {
-                        string? newTargetFrameworkName = (string?)await projectProperties.TargetFramework.GetValueAsync();
+                        string? newTargetFrameworkAlias = (string?)await projectProperties.TargetFramework.GetValueAsync();
 
-                        if (string.IsNullOrEmpty(newTargetFrameworkName) && TargetFramework.Empty.Equals(previousContext.ActiveTargetFramework))
+                        if (string.IsNullOrEmpty(newTargetFrameworkAlias) && TargetFramework.Empty.Equals(previousContext.ActiveTargetFramework))
                         {
                             // No change
                             return null;
                         }
 
-                        TargetFramework? newTargetFramework = _targetFrameworkProvider.GetTargetFramework(newTargetFrameworkName);
-                        if (previousContext.ActiveTargetFramework.Equals(newTargetFramework))
+                        if (StringComparers.FrameworkIdentifiers.Equals(previousContext.ActiveTargetFramework.TargetFrameworkAlias, newTargetFrameworkAlias))
                         {
                             // No change
                             return null;
@@ -116,30 +111,28 @@ namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies.Subscriptions
                     Assumes.NotNull(previousContext);
                     Assumes.True(activeProjectConfiguration.IsCrossTargeting());
 
-                    TargetFramework? activeTargetFramework = _targetFrameworkProvider.GetTargetFramework(activeProjectConfiguration.Dimensions[ConfigurationGeneral.TargetFrameworkProperty]);
+                    string activeTargetFrameworkAlias = activeProjectConfiguration.Dimensions[ConfigurationGeneral.TargetFrameworkProperty];
 
-                    if (!previousContext.ActiveTargetFramework.Equals(activeTargetFramework))
+                    if (!StringComparers.FrameworkIdentifiers.Equals(previousContext.ActiveTargetFramework.TargetFrameworkAlias, activeTargetFrameworkAlias))
                     {
                         // Active target framework is different.
                         return false;
                     }
 
-                    var targetFrameworkMonikers = knownProjectConfigurations
+                    var targetFrameworkAliases = knownProjectConfigurations
                         .Select(c => c.Dimensions[ConfigurationGeneral.TargetFrameworkProperty])
                         .Distinct()
                         .ToList();
 
-                    if (targetFrameworkMonikers.Count != previousContext.TargetFrameworks.Length)
+                    if (targetFrameworkAliases.Count != previousContext.TargetFrameworks.Length)
                     {
                         // Different number of target frameworks.
                         return false;
                     }
 
-                    foreach (string targetFrameworkMoniker in targetFrameworkMonikers)
+                    foreach (string targetFrameworkAlias in targetFrameworkAliases)
                     {
-                        TargetFramework? targetFramework = _targetFrameworkProvider.GetTargetFramework(targetFrameworkMoniker);
-
-                        if (targetFramework == null || !previousContext.TargetFrameworks.Contains(targetFramework))
+                        if (!previousContext.TargetFrameworks.Any(tf => StringComparers.FrameworkIdentifiers.Equals(tf.TargetFrameworkAlias, targetFrameworkAlias)))
                         {
                             // Differing TargetFramework
                             return false;

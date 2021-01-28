@@ -36,7 +36,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies
             var snapshot = DependenciesSnapshot.Empty;
 
             // Act
-            var resultTree = await CreateProvider().BuildTreeAsync(dependenciesRoot, snapshot);
+            var resultTree = await CreateProvider().BuildTreeAsync(dependenciesRoot, snapshot, null, UnconfiguredProjectFactory.Create());
 
             // Assert
             var expectedFlatHierarchy = "Caption=MyDependencies, IconHash=325248080, ExpandedIconHash=325248080, Rule=, IsProjectItem=False, CustomTag=";
@@ -126,7 +126,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies
             var snapshot = GetSnapshot((_tfm1, new[] { dependencyXxx1, dependencyYyy1, dependencyYyyExisting }));
 
             // Act
-            var resultTree = await provider.BuildTreeAsync(dependenciesRoot, snapshot);
+            var resultTree = await provider.BuildTreeAsync(dependenciesRoot, snapshot, null, UnconfiguredProjectFactory.Create());
 
             // Assert
             const string expectedFlatHierarchy =
@@ -188,7 +188,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies
             var snapshot = GetSnapshot((_tfm1, new[] { dependencyYyyExisting }));
 
             // Act
-            var resultTree = await provider.BuildTreeAsync(dependenciesRoot, snapshot);
+            var resultTree = await provider.BuildTreeAsync(dependenciesRoot, snapshot, null, UnconfiguredProjectFactory.Create());
 
             // Assert
             var expectedFlatHierarchy =
@@ -246,7 +246,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies
             var snapshot = GetSnapshot((_tfm1, new[] { dependencyYyyExisting }));
 
             // Act
-            var resultTree = await provider.BuildTreeAsync(dependenciesRoot, snapshot);
+            var resultTree = await provider.BuildTreeAsync(dependenciesRoot, snapshot, null, UnconfiguredProjectFactory.Create());
 
             // Assert
             var expectedFlatHierarchy =
@@ -304,7 +304,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies
             var snapshot = GetSnapshot((_tfm1, new[] { dependencyYyyExisting }));
 
             // Act
-            var resultTree = await provider.BuildTreeAsync(dependenciesRoot, snapshot);
+            var resultTree = await provider.BuildTreeAsync(dependenciesRoot, snapshot, null, UnconfiguredProjectFactory.Create());
 
             // Assert
             var expectedFlatHierarchy =
@@ -354,7 +354,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies
             var snapshot = GetSnapshot((_tfm1, new[] { dependencyVisibilityMarker }));
 
             // Act
-            var resultTree = await provider.BuildTreeAsync(dependenciesRoot, snapshot);
+            var resultTree = await provider.BuildTreeAsync(dependenciesRoot, snapshot, null, UnconfiguredProjectFactory.Create());
 
             // Assert
             var expectedFlatHierarchy =
@@ -402,7 +402,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies
             var snapshot = GetSnapshot((_tfm1, new[] { dependencyVisibilityMarker }));
 
             // Act
-            var resultTree = await provider.BuildTreeAsync(dependenciesRoot, snapshot);
+            var resultTree = await provider.BuildTreeAsync(dependenciesRoot, snapshot, null, UnconfiguredProjectFactory.Create());
 
             // Assert
             var expectedFlatHierarchy =
@@ -529,25 +529,25 @@ namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies
                 (TargetFramework.Any, new[] { dependencyAny1 }));
 
             // Act
-            var resultTree = await provider.BuildTreeAsync(dependenciesRoot, snapshot);
+            var resultTree = await provider.BuildTreeAsync(dependenciesRoot, snapshot, null, UnconfiguredProjectFactory.Create());
 
             // Assert
             const string expectedFlatHierarchy =
 @"Caption=MyDependencies, IconHash=325248080, ExpandedIconHash=325248080, Rule=, IsProjectItem=False, CustomTag=
     Caption=ZzzDependencyRoot, IconHash=0, ExpandedIconHash=0, Rule=, IsProjectItem=False, CustomTag=
         Caption=ZzzDependencyAny1, IconHash=325248665, ExpandedIconHash=325248817, Rule=, IsProjectItem=False, CustomTag=
-    Caption=tfm2, IconHash=0, ExpandedIconHash=0, Rule=, IsProjectItem=False, CustomTag=, BubbleUpFlag=True
-        Caption=XxxDependencyRoot, IconHash=0, ExpandedIconHash=0, Rule=, IsProjectItem=False, CustomTag=
-            Caption=Dependency1, IconHash=325248088, ExpandedIconHash=325248260, Rule=, IsProjectItem=False, CustomTag=
-        Caption=YyyDependencyRoot, IconHash=0, ExpandedIconHash=0, Rule=, IsProjectItem=False, CustomTag=
-            Caption=Dependency1, IconHash=325248088, ExpandedIconHash=325248260, Rule=, IsProjectItem=False, CustomTag=
-            Caption=DependencyExisting, IconHash=325248088, ExpandedIconHash=325248260, Rule=, IsProjectItem=False, CustomTag=
     Caption=tfm1, IconHash=0, ExpandedIconHash=0, Rule=, IsProjectItem=False, CustomTag=, BubbleUpFlag=True
         Caption=XxxDependencyRoot, IconHash=0, ExpandedIconHash=0, Rule=, IsProjectItem=False, CustomTag=
             Caption=Dependency1, IconHash=325248088, ExpandedIconHash=325248260, Rule=, IsProjectItem=True, CustomTag=
         Caption=YyyDependencyRoot, IconHash=0, ExpandedIconHash=0, Rule=, IsProjectItem=False, CustomTag=
             Caption=Dependency1, IconHash=325248088, ExpandedIconHash=325248260, Rule=, IsProjectItem=True, CustomTag=
-            Caption=DependencyExisting, IconHash=325248088, ExpandedIconHash=325248260, Rule=, IsProjectItem=True, CustomTag=";
+            Caption=DependencyExisting, IconHash=325248088, ExpandedIconHash=325248260, Rule=, IsProjectItem=True, CustomTag=
+    Caption=tfm2, IconHash=0, ExpandedIconHash=0, Rule=, IsProjectItem=False, CustomTag=, BubbleUpFlag=True
+        Caption=XxxDependencyRoot, IconHash=0, ExpandedIconHash=0, Rule=, IsProjectItem=False, CustomTag=
+            Caption=Dependency1, IconHash=325248088, ExpandedIconHash=325248260, Rule=, IsProjectItem=False, CustomTag=
+        Caption=YyyDependencyRoot, IconHash=0, ExpandedIconHash=0, Rule=, IsProjectItem=False, CustomTag=
+            Caption=Dependency1, IconHash=325248088, ExpandedIconHash=325248260, Rule=, IsProjectItem=False, CustomTag=
+            Caption=DependencyExisting, IconHash=325248088, ExpandedIconHash=325248260, Rule=, IsProjectItem=False, CustomTag=";
             AssertTestData(expectedFlatHierarchy, resultTree);
         }
 

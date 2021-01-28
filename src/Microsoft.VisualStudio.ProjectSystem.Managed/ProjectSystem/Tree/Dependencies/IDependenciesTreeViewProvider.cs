@@ -3,6 +3,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Composition;
+using Microsoft.VisualStudio.ProjectSystem.Properties;
 using Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies.Snapshot;
 
 namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies
@@ -22,11 +23,15 @@ namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies
         /// </summary>
         /// <param name="dependenciesTree">The previous dependencies tree, to which the updated <paramref name="snapshot"/> should be applied.</param>
         /// <param name="snapshot">The current dependencies snapshot to apply to the tree.</param>
+        /// <param name="ruleFactory"></param>
+        /// <param name="unconfiguredProject"></param>
         /// <param name="cancellationToken">Supports cancellation of this operation.</param>
         /// <returns>An updated "Dependencies" node.</returns>
         Task<IProjectTree> BuildTreeAsync(
             IProjectTree dependenciesTree,
             DependenciesSnapshot snapshot,
+            IRuleFactory? ruleFactory,
+            UnconfiguredProject unconfiguredProject,
             CancellationToken cancellationToken = default);
     }
 }
