@@ -115,7 +115,7 @@ Namespace Microsoft.VisualStudio.Editors.OptionPages
             ' Tools | Options UI, if has been created.
             If _shouldUpdateOptionsControlOnPropertyChange AndAlso _optionsControl IsNot Nothing Then
                 ThreadHelper.JoinableTaskFactory.RunAsync(
-                    Async Function() As Task(Of Task)
+                    Async Function() As System.Threading.Tasks.Task
                         Await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync()
                         DataContextOptions.CopyFrom(SDKStyleProjectOptionsData.MainInstance)
                     End Function)
