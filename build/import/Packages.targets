@@ -64,7 +64,7 @@
     <PackageReference Update="Microsoft.VisualStudio.Utilities"                                       Version="17.0.0-previews-2-31421-281" />
     <PackageReference Update="Microsoft.VisualStudio.Validation"                                      Version="17.0.12-alpha" />
     <PackageReference Update="Microsoft.VisualStudio.XmlEditor"                                       Version="17.0.0-preview-2-31608-029" />
-    <PackageReference Update="Microsoft.VSDesigner"                                                   Version="17.0.0-preview-2-31608-029" />
+    <PackageReference Update="Microsoft.VSDesigner"                                                   Version="17.0.0-previews-4-31608-029" />
     <PackageReference Update="VsWebSite.Interop"                                                      Version="16.11.31604.176" />
 
     <!-- https://github.com/dotnet/roslyn/issues/53877 -->
