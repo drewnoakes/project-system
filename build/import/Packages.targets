@@ -65,7 +65,7 @@
     <PackageReference Update="Microsoft.VisualStudio.Validation"                                      Version="17.0.12-alpha" />
     <PackageReference Update="Microsoft.VisualStudio.XmlEditor"                                       Version="17.0.0-preview-2-31223-026" />
     <PackageReference Update="Microsoft.VSDesigner"                                                   Version="17.0.0-preview-2-31223-026" />
-    <PackageReference Update="VsWebSite.Interop"                                                      Version="16.8.30523.219"/>
+    <PackageReference Update="VsWebSite.Interop"                                                      Version="16.11.31604.176"/>
 
     <!-- https://github.com/dotnet/roslyn/issues/53877 -->
     <PackageReference Include="StreamJsonRpc"                                                         Version="2.8.21" />
