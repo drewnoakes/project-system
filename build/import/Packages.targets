@@ -30,7 +30,7 @@
     <PackageReference Update="Microsoft.Net.Compilers.Toolset"                                        Version="3.8.0-5.final" />
     <PackageReference Update="OpenCover"                                                              Version="4.6.519" />
     <PackageReference Update="Codecov"                                                                Version="$(CodecovVersion)" />
-    <PackageReference Update="MicroBuild.Core"                                                        Version="0.2.0" />
+    <PackageReference Update="MicroBuild.Core"                                                        Version="0.3.1" />
     <PackageReference Update="MicroBuild.Core.Sentinel"                                               Version="1.0.0" />
     <PackageReference Update="MicroBuild.Plugins.SwixBuild"                                           Version="$(MicroBuildPluginsSwixBuildVersion)" />
     <PackageReference Update="Microsoft.DevDiv.Validation.MediaRecorder"                              Version="15.0.199" />
