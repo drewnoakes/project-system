@@ -57,7 +57,7 @@
     <PackageReference Update="Microsoft.VisualStudio.SDK.EmbedInteropTypes"                           Version="15.0.34" />
     <PackageReference Update="Microsoft.VisualStudio.Shell.15.0"                                      Version="17.0.0-previews-2-31421-281" />
     <PackageReference Update="Microsoft.VisualStudio.Shell.Design"                                    Version="17.0.0-previews-2-31421-281" />
-    <PackageReference Update="Microsoft.VisualStudio.Shell.Framework"                                 Version="17.0.0-previews-2-31421-281" />
+    <PackageReference Update="Microsoft.VisualStudio.Shell.Framework"                                 Version="17.0.0-previews-4-31608-029" />
     <PackageReference Update="Microsoft.VisualStudio.TemplateWizardInterface"                         Version="17.0.0-preview-2-31223-026" />
     <PackageReference Update="Microsoft.VisualStudio.Threading"                                       Version="17.0.26-alpha" />
     <PackageReference Update="Microsoft.VisualStudio.Threading.Analyzers"                             Version="17.0.26-alpha" />
