@@ -68,7 +68,7 @@
     <PackageReference Update="VsWebSite.Interop"                                                      Version="16.8.30523.219"/>
 
     <!-- https://github.com/dotnet/roslyn/issues/53877 -->
-    <PackageReference Include="StreamJsonRpc"                                                         Version="2.8.21" />
+    <PackageReference Include="StreamJsonRpc"                                                         Version="2.8.28" />
 
     <!-- CPS -->
     <PackageReference Update="Microsoft.VisualStudio.ProjectSystem"                                   Version="17.0.788-pre" />
