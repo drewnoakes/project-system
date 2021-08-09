@@ -42,7 +42,7 @@
     <PackageReference Update="Microsoft.VisualStudio.ComponentModelHost"                              Version="17.0.154-preview"/>
     <PackageReference Update="Microsoft.VisualStudio.Composition"                                     Version="16.9.20"/>
     <PackageReference Update="Microsoft.VisualStudio.Data.Core"                                       Version="17.0.0-preview-2-31223-026" />
-    <PackageReference Update="Microsoft.VisualStudio.DataDesign.Common"                               Version="17.0.0-preview-2-31223-026"/>
+    <PackageReference Update="Microsoft.VisualStudio.DataDesign.Common"                               Version="17.0.0-previews-4-31608-029"/>
     <PackageReference Update="Microsoft.VisualStudio.Data.Services"                                   Version="17.0.0-preview-2-31223-026" />
     <PackageReference Update="Microsoft.VisualStudio.DataTools.Interop"                               Version="17.0.0-preview-2-31223-026" />
     <PackageReference Update="Microsoft.VisualStudio.Debugger.Contracts"                              Version="17.2.0-beta.21378.1" />
