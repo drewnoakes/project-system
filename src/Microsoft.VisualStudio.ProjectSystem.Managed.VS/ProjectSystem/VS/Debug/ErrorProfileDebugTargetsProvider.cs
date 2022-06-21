@@ -22,7 +22,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Debug
         private readonly ConfiguredProject _configuredProject;
 
         /// <summary>
-        /// This provider handles the NoAction profile
+        /// This provider handles the ErrorProfile profile
         /// </summary>
         public bool SupportsProfile(ILaunchProfile profile)
         {
