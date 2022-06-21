@@ -9,6 +9,13 @@ using Microsoft.VisualStudio.Threading.Tasks;
 
 namespace Microsoft.VisualStudio.ProjectSystem.Debug
 {
+    [ProjectSystemContract(ProjectSystemContractScope.Global, ProjectSystemContractProvider.System, Cardinality = Composition.ImportCardinality.OneOrZero)]
+    internal interface ILaunchSettingsErrorListProvider
+    {
+        void ClearErrors(UnconfiguredProject project);
+        void SetError(Exception ex, string fileName, UnconfiguredProject project);
+    }
+
     /// <summary>
     /// Manages the set of Debug profiles and web server settings and provides these as a dataflow source. Note
     /// that many of the methods are protected so that unit tests can derive from this class and poke them as
@@ -42,9 +49,11 @@ namespace Microsoft.VisualStudio.ProjectSystem.Debug
         private readonly IUnconfiguredProjectCommonServices _commonProjectServices;
         private readonly IActiveConfiguredProjectSubscriptionService? _projectSubscriptionService;
         private readonly IFileSystem _fileSystem;
+        private readonly ILaunchSettingsErrorListProvider _errorListProvider;
         private readonly TaskCompletionSource _firstSnapshotCompletionSource = new();
         private readonly SequentialTaskExecutor _sequentialTaskQueue;
         private readonly Lazy<LaunchProfile?> _defaultLaunchProfile;
+
         private IReceivableSourceBlock<ILaunchSettings>? _changedSourceBlock;
         private IBroadcastBlock<ILaunchSettings>? _broadcastBlock;
         private IReceivableSourceBlock<IProjectVersionedValue<ILaunchSettings>>? _versionedChangedSourceBlock;
@@ -58,6 +67,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.Debug
             UnconfiguredProject project,
             IUnconfiguredProjectServices projectServices,
             IFileSystem fileSystem,
+            ILaunchSettingsErrorListProvider errorListProvider,
             IUnconfiguredProjectCommonServices commonProjectServices,
             IActiveConfiguredProjectSubscriptionService? projectSubscriptionService,
             IActiveConfiguredValue<IAppDesignerFolderSpecialFileProvider?> appDesignerSpecialFileProvider,
@@ -68,14 +78,13 @@ namespace Microsoft.VisualStudio.ProjectSystem.Debug
             _project = project;
             _projectServices = projectServices;
             _fileSystem = fileSystem;
+            _errorListProvider = errorListProvider;
             _commonProjectServices = commonProjectServices;
 
             _sequentialTaskQueue = new SequentialTaskExecutor(new JoinableTaskContextNode(joinableTaskContext), nameof(LaunchSettingsProvider));
 
-            JsonSerializationProviders = new OrderPrecedenceImportCollection<ILaunchSettingsSerializationProvider, IJsonSection>(ImportOrderPrecedenceComparer.PreferenceOrder.PreferredComesFirst,
-                                                                                                                    project);
+            JsonSerializationProviders = new OrderPrecedenceImportCollection<ILaunchSettingsSerializationProvider, IJsonSection>(ImportOrderPrecedenceComparer.PreferenceOrder.PreferredComesFirst, project);
             SourceControlIntegrations = new OrderPrecedenceImportCollection<ISourceCodeControlIntegration>(projectCapabilityCheckProvider: project);
-
             DefaultLaunchProfileProviders = new OrderPrecedenceImportCollection<IDefaultLaunchProfileProvider>(ImportOrderPrecedenceComparer.PreferenceOrder.PreferredComesFirst, project);
 
             _projectSubscriptionService = projectSubscriptionService;
@@ -311,6 +320,8 @@ namespace Microsoft.VisualStudio.ProjectSystem.Debug
                     version: GetNextVersion());
 
                 FinishUpdate(newSnapshot);
+
+                _errorListProvider.ClearErrors(_project);
             }
             catch (Exception ex)
             {
@@ -328,6 +339,10 @@ namespace Microsoft.VisualStudio.ProjectSystem.Debug
                     var snapshot = new LaunchSettings(new[] { errorProfile }, null, errorProfile.Name, version: GetNextVersion());
                     FinishUpdate(snapshot);
                 }
+
+                string fileName = await GetLaunchSettingsFilePathAsync();
+
+                _errorListProvider.SetError(ex, fileName, _project);
             }
 
             // Re-applies in-memory profiles to the newly created snapshot. Note that we don't want to merge in the error
@@ -595,6 +610,9 @@ namespace Microsoft.VisualStudio.ProjectSystem.Debug
             if (disposing)
             {
                 CleanupFileWatcher();
+
+                _errorListProvider.ClearErrors(_project);
+
                 if (FileChangeScheduler != null)
                 {
                     FileChangeScheduler.Dispose();
