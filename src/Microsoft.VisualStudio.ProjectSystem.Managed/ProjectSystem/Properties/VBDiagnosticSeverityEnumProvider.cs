@@ -59,12 +59,6 @@ internal sealed class VBDiagnosticSeverityEnumProvider : SupportedValuesProvider
 
     protected override string[] RuleNames => s_ruleNames;
 
-    protected override int SortValues(IEnumValue a, IEnumValue b)
-    {
-        // This method will never be called, and the items are already sorted, anyway.
-        throw new NotImplementedException();
-    }
-
     protected override IEnumValue ToEnumValue(KeyValuePair<string, IImmutableDictionary<string, string>> item)
     {
         // This method will never be called, and we aren't converting MSBuild items to enum

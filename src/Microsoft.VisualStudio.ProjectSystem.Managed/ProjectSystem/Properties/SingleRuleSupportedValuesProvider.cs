@@ -1,7 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements. The .NET Foundation licenses this file to you under the MIT license. See the LICENSE.md file in the project root for more information.
 
 using Microsoft.Build.Framework.XamlTypes;
-using EnumCollection = System.Collections.Generic.ICollection<Microsoft.VisualStudio.ProjectSystem.Properties.IEnumValue>;
 
 namespace Microsoft.VisualStudio.ProjectSystem.Properties
 {
@@ -22,11 +21,13 @@ namespace Microsoft.VisualStudio.ProjectSystem.Properties
             _useNoneValue = useNoneValue;
         }
 
-        protected override EnumCollection Transform(IProjectSubscriptionUpdate input)
+        protected override ICollection<IEnumValue> Transform(IProjectSubscriptionUpdate input)
         {
-            IProjectRuleSnapshot snapshot = input.CurrentState[_ruleName];
+            var snapshot = input.CurrentState[_ruleName] as IDataWithOriginalSource<KeyValuePair<string, IImmutableDictionary<string, string>>>;
 
-            int capacity = snapshot.Items.Count + (_useNoneValue ? 1 : 0);
+            Assumes.NotNull(snapshot);
+
+            int capacity = snapshot.SourceData.Count + (_useNoneValue ? 1 : 0);
             var list = new List<IEnumValue>(capacity);
 
             if (_useNoneValue)
@@ -38,8 +39,8 @@ namespace Microsoft.VisualStudio.ProjectSystem.Properties
                 }));
             }
 
-            list.AddRange(snapshot.Items.Select(ToEnumValue));
-            list.Sort(SortValues); // TODO: This is a hotfix for item ordering. Remove this when completing: https://github.com/dotnet/project-system/issues/7025
+            list.AddRange(snapshot.SourceData.Select(ToEnumValue));
+
             return list;
         }
     }

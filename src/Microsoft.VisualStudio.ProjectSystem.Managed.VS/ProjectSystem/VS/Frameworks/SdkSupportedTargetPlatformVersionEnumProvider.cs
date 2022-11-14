@@ -28,10 +28,5 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Frameworks
                 Name = item.Key
             });
         }
-
-        protected override int SortValues(IEnumValue a, IEnumValue b)
-        {
-            return NaturalStringComparer.Instance.Compare(a.Name, b.Name);
-        }
     }
 }

@@ -29,10 +29,5 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Frameworks
                 DisplayName = item.Value[SdkSupportedTargetPlatformIdentifier.DisplayNameProperty]
             });
         }
-
-        protected override int SortValues(IEnumValue a, IEnumValue b)
-        {
-            return StringComparer.OrdinalIgnoreCase.Compare(a.DisplayName, b.DisplayName);
-        }
     }
 }

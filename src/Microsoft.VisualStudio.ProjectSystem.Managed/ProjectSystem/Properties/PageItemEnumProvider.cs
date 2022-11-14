@@ -21,11 +21,6 @@ internal class PageItemEnumProvider : SingleRuleSupportedValuesProvider
     {
     }
 
-    protected override int SortValues(IEnumValue a, IEnumValue b)
-    {
-        return StringComparers.Paths.Compare(a.DisplayName, b.DisplayName);
-    }
-
     protected override IEnumValue ToEnumValue(KeyValuePair<string, IImmutableDictionary<string, string>> item)
     {
         // TODO: Only include items that are defined under the project root, that is, the

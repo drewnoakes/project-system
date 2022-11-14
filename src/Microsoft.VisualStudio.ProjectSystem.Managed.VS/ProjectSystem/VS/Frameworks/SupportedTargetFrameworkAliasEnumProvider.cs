@@ -4,8 +4,6 @@ using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.Framework.XamlTypes;
 using Microsoft.VisualStudio.ProjectSystem.Properties;
 using Microsoft.VisualStudio.Threading;
-using EnumCollection = System.Collections.Generic.ICollection<Microsoft.VisualStudio.ProjectSystem.Properties.IEnumValue>;
-using EnumCollectionProjectValue = Microsoft.VisualStudio.ProjectSystem.IProjectVersionedValue<System.Collections.Generic.ICollection<Microsoft.VisualStudio.ProjectSystem.Properties.IEnumValue>>;
 
 namespace Microsoft.VisualStudio.ProjectSystem.VS.Frameworks
 {
@@ -14,7 +12,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Frameworks
     /// </summary>
     [ExportDynamicEnumValuesProvider("SupportedTargetFrameworkAliasEnumProvider")]
     [AppliesTo(ProjectCapability.DotNet)]
-    internal class SupportedTargetFrameworkAliasEnumProvider : ChainedProjectValueDataSourceBase<EnumCollection>, IDynamicEnumValuesProvider, IDynamicEnumValuesGenerator
+    internal class SupportedTargetFrameworkAliasEnumProvider : ChainedProjectValueDataSourceBase<ICollection<IEnumValue>>, IDynamicEnumValuesProvider, IDynamicEnumValuesGenerator
     {
         private readonly IProjectSubscriptionService _subscriptionService;
 
@@ -45,12 +43,12 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Frameworks
             EnsureInitialized();
         }
 
-        protected override IDisposable? LinkExternalInput(ITargetBlock<EnumCollectionProjectValue> targetBlock)
+        protected override IDisposable? LinkExternalInput(ITargetBlock<IProjectVersionedValue<ICollection<IEnumValue>>> targetBlock)
         {
             IProjectValueDataSource<IProjectSubscriptionUpdate> source = _subscriptionService.ProjectBuildRuleSource;
 
             // Transform the changes from design-time build -> Supported target frameworks
-            DisposableValue<ISourceBlock<EnumCollectionProjectValue>> transformBlock = source.SourceBlock.TransformWithNoDelta(
+            DisposableValue<ISourceBlock<IProjectVersionedValue<ICollection<IEnumValue>>>> transformBlock = source.SourceBlock.TransformWithNoDelta(
                 update => update.Derive(Transform),
                 suppressVersionOnlyUpdates: false,
                 ruleNames: SupportedTargetFrameworkAlias.SchemaName);
@@ -65,12 +63,15 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Frameworks
             return transformBlock;
         }
 
-        private static EnumCollection Transform(IProjectSubscriptionUpdate input)
+        private static ICollection<IEnumValue> Transform(IProjectSubscriptionUpdate input)
         {
-            IProjectRuleSnapshot snapshot = input.CurrentState[SupportedTargetFrameworkAlias.SchemaName];
+            var snapshot = input.CurrentState[SupportedTargetFrameworkAlias.SchemaName].Items as IDataWithOriginalSource<KeyValuePair<string, IImmutableDictionary<string, string>>>;
 
-            return snapshot.Items.Select(ToEnumValue)
-                                    .ToList();
+            Assumes.NotNull(snapshot);
+
+            var list = new List<IEnumValue>(capacity: snapshot.SourceData.Count);
+            list.AddRange(snapshot.SourceData.Select(ToEnumValue));
+            return list;
         }
 
         private static IEnumValue ToEnumValue(KeyValuePair<string, IImmutableDictionary<string, string>> item)
@@ -90,20 +91,19 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Frameworks
             return Task.FromResult<IDynamicEnumValuesGenerator>(this);
         }
 
-        public async Task<EnumCollection> GetListedValuesAsync()
+        public async Task<ICollection<IEnumValue>> GetListedValuesAsync()
         {
             if (!IsReadyToBuild())
                 throw new InvalidOperationException("This configuration is not set to build");
 
-            // NOTE: This has a race, if called off the UI thread, the configuration could become 
+            // NOTE: This has a race, if called off the UI thread, the configuration could become
             // inactive underneath us and hence not ready for build, causing below to block forever.
 
             using (JoinableCollection.Join())
             {
-                EnumCollectionProjectValue snapshot = await SourceBlock.ReceiveAsync();
+                IProjectVersionedValue<ICollection<IEnumValue>> snapshot = await SourceBlock.ReceiveAsync();
 
-                // TODO: This is a hotfix for item ordering. Remove this OrderBy when completing: https://github.com/dotnet/project-system/issues/7025
-                return snapshot.Value.OrderBy(e => e.DisplayName).ToArray();
+                return snapshot.Value;
             }
         }
 

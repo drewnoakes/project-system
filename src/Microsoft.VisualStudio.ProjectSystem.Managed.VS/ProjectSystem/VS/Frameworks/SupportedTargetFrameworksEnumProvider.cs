@@ -2,7 +2,6 @@
 
 using Microsoft.Build.Framework.XamlTypes;
 using Microsoft.VisualStudio.ProjectSystem.Properties;
-using EnumCollection = System.Collections.Generic.ICollection<Microsoft.VisualStudio.ProjectSystem.Properties.IEnumValue>;
 
 namespace Microsoft.VisualStudio.ProjectSystem.VS.Frameworks
 {
@@ -22,7 +21,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Frameworks
             : base(project, subscriptionService) {
         }
 
-        protected override EnumCollection Transform(IProjectSubscriptionUpdate input)
+        protected override ICollection<IEnumValue> Transform(IProjectSubscriptionUpdate input)
         {
             IProjectRuleSnapshot configurationGeneral = input.CurrentState[ConfigurationGeneral.SchemaName];
 
@@ -64,13 +63,12 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Frameworks
                 return result;
             }
 
-            IProjectRuleSnapshot snapshot = input.CurrentState[ruleName];
+            var snapshot = input.CurrentState[ruleName].Items as IDataWithOriginalSource<KeyValuePair<string, IImmutableDictionary<string, string>>>;
 
-            int capacity = snapshot.Items.Count;
-            var list = new List<IEnumValue>(capacity);
+            Assumes.NotNull(snapshot);
 
-            list.AddRange(snapshot.Items.Select(ToEnumValue));
-            list.Sort(SortValues); // TODO: This is a hotfix for item ordering. Remove this when completing: https://github.com/dotnet/project-system/issues/7025
+            var list = new List<IEnumValue>(capacity: snapshot.SourceData.Count);
+            list.AddRange(snapshot.SourceData.Select(ToEnumValue));
             return list;
         }
 
@@ -84,11 +82,6 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Frameworks
                 Name = item.Key,
                 DisplayName = item.Value[SupportedTargetFramework.DisplayNameProperty],
             });
-        }
-
-        protected override int SortValues(IEnumValue a, IEnumValue b)
-        {
-            return NaturalStringComparer.Instance.Compare(a.DisplayName, b.DisplayName);
         }
     }
 }

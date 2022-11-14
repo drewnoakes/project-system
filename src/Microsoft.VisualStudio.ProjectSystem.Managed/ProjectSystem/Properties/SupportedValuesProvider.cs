@@ -3,15 +3,13 @@
 using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.Framework.XamlTypes;
 using Microsoft.VisualStudio.Threading;
-using EnumCollection = System.Collections.Generic.ICollection<Microsoft.VisualStudio.ProjectSystem.Properties.IEnumValue>;
-using EnumCollectionProjectValue = Microsoft.VisualStudio.ProjectSystem.IProjectVersionedValue<System.Collections.Generic.ICollection<Microsoft.VisualStudio.ProjectSystem.Properties.IEnumValue>>;
 
 namespace Microsoft.VisualStudio.ProjectSystem.Properties
 {
     /// <summary>
     ///     Abstract class for providers that process values from evaluation.
     /// </summary>
-    internal abstract class SupportedValuesProvider : ChainedProjectValueDataSourceBase<EnumCollection>, IDynamicEnumValuesProvider, IDynamicEnumValuesGenerator
+    internal abstract class SupportedValuesProvider : ChainedProjectValueDataSourceBase<ICollection<IEnumValue>>, IDynamicEnumValuesProvider, IDynamicEnumValuesGenerator
     {
         protected IProjectSubscriptionService SubscriptionService { get; }
 
@@ -25,12 +23,12 @@ namespace Microsoft.VisualStudio.ProjectSystem.Properties
             SubscriptionService = subscriptionService;
         }
 
-        protected override IDisposable? LinkExternalInput(ITargetBlock<EnumCollectionProjectValue> targetBlock)
+        protected override IDisposable? LinkExternalInput(ITargetBlock<IProjectVersionedValue<ICollection<IEnumValue>>> targetBlock)
         {
             IProjectValueDataSource<IProjectSubscriptionUpdate> source = SubscriptionService.ProjectRuleSource;
 
             // Transform the values from evaluation to structure from the rule schema.
-            DisposableValue<ISourceBlock<EnumCollectionProjectValue>> transformBlock = source.SourceBlock.TransformWithNoDelta(
+            DisposableValue<ISourceBlock<IProjectVersionedValue<ICollection<IEnumValue>>>> transformBlock = source.SourceBlock.TransformWithNoDelta(
                 update => update.Derive(Transform),
                 suppressVersionOnlyUpdates: false,
                 ruleNames: RuleNames);
@@ -45,9 +43,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.Properties
             return transformBlock;
         }
 
-        protected abstract EnumCollection Transform(IProjectSubscriptionUpdate input);
-
-        protected abstract int SortValues(IEnumValue a, IEnumValue b);
+        protected abstract ICollection<IEnumValue> Transform(IProjectSubscriptionUpdate input);
 
         protected abstract IEnumValue ToEnumValue(KeyValuePair<string, IImmutableDictionary<string, string>> item);
 
@@ -60,81 +56,13 @@ namespace Microsoft.VisualStudio.ProjectSystem.Properties
             return Task.FromResult<IDynamicEnumValuesGenerator>(this);
         }
 
-        public async Task<EnumCollection> GetListedValuesAsync()
+        public async Task<ICollection<IEnumValue>> GetListedValuesAsync()
         {
             using (JoinableCollection.Join())
             {
-                EnumCollectionProjectValue snapshot = await SourceBlock.ReceiveAsync();
+                IProjectVersionedValue<ICollection<IEnumValue>> snapshot = await SourceBlock.ReceiveAsync();
 
                 return snapshot.Value;
-            }
-        }
-
-        protected sealed class NaturalStringComparer : IComparer<string>
-        {
-            public static NaturalStringComparer Instance { get; } = new NaturalStringComparer();
-
-            public int Compare(string x, string y)
-            {
-                // sort nulls to the start
-                if (x is null)
-                    return y is null ? 0 : -1;
-                if (y is null)
-                    return 1;
-
-                var ix = 0;
-                var iy = 0;
-
-                while (true)
-                {
-                    // sort shorter strings to the start
-                    if (ix >= x.Length)
-                        return iy >= y.Length ? 0 : -1;
-                    if (iy >= y.Length)
-                        return 1;
-
-                    var cx = x[ix];
-                    var cy = y[iy];
-
-                    int result;
-                    if (char.IsDigit(cx) && char.IsDigit(cy))
-                        result = CompareInteger(x, y, ref ix, ref iy);
-                    else
-                        result = cx.CompareTo(y[iy]);
-
-                    if (result != 0)
-                        return result;
-
-                    ix++;
-                    iy++;
-                }
-            }
-
-            private static int CompareInteger(string x, string y, ref int ix, ref int iy)
-            {
-                var lx = GetNumLength(x, ix);
-                var ly = GetNumLength(y, iy);
-
-                // shorter number first (note, doesn't handle leading zeroes)
-                if (lx != ly)
-                    return lx.CompareTo(ly);
-
-                for (var i = 0; i < lx; i++)
-                {
-                    var result = x[ix++].CompareTo(y[iy++]);
-                    if (result != 0)
-                        return result;
-                }
-
-                return 0;
-            }
-
-            private static int GetNumLength(string s, int i)
-            {
-                var length = 0;
-                while (i < s.Length && char.IsDigit(s[i++]))
-                    length++;
-                return length;
             }
         }
     }
