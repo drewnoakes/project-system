@@ -529,6 +529,13 @@
         <TargetPath>%(IntermediateSatelliteAssembliesWithTargetPath.Culture)\$(TargetName).resources.dll</TargetPath>
       </_CollectedCopyToOutputDirectoryItem>
 
+      <!-- Serialization assemblies -->
+
+      <_CollectedCopyToOutputDirectoryItem Include="$(TargetDir)$(_SGenDllName)" Condition="'$(_SGenDllCreated)' == 'true'">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <TargetPath>$(_SGenDllName)</TargetPath>
+      </_CollectedCopyToOutputDirectoryItem>
+
     </ItemGroup>
   </Target>
 
