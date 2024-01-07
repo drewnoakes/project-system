@@ -29,7 +29,7 @@
     <PackageVersion Include="Microsoft.VisualStudioEng.MicroBuild.Core"                              Version="1.0.0" />
     <PackageVersion Include="Nerdbank.GitVersioning"                                                 Version="3.6.79-alpha" />
     <PackageVersion Include="Nerdbank.Streams"                                                       Version="2.10.69" />
-    <PackageVersion Include="System.IO.Pipelines"                                                    Version="7.0.0" />
+    <PackageVersion Include="System.IO.Pipelines"                                                    Version="8.0.0" />
 
     <!-- VS SDK -->
     <!-- https://dev.azure.com/azure-public/vside/_artifacts/feed/vssdk -->
@@ -62,7 +62,7 @@
     <PackageVersion Include="Microsoft.VisualStudio.Validation"                                      Version="17.6.11" />
     <PackageVersion Include="Microsoft.VisualStudio.XmlEditor"                                       Version="17.3.32804.24" />
     <PackageVersion Include="Microsoft.VSSDK.BuildTools"                                             Version="17.5.18-preview1" />
-    <PackageVersion Include="System.Threading.Tasks.Dataflow"                                        Version="7.0.0" />
+    <PackageVersion Include="System.Threading.Tasks.Dataflow"                                        Version="8.0.0" />
     <PackageVersion Include="Microsoft.VSDesigner"                                                   Version="17.0.0-preview-2-31223-026" />
     <PackageVersion Include="VsWebSite.Interop"                                                      Version="16.8.30523.219" />
 
