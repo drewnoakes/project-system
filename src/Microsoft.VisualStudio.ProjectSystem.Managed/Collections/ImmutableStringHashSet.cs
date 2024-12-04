@@ -12,6 +12,8 @@ namespace System.Collections.Immutable
 
         // For semantic string comparers.
 
+        public static readonly ImmutableHashSet<string> EmptyPaths = ImmutableHashSet.Create<string>(StringComparers.Paths);
+
         public static readonly ImmutableHashSet<string> EmptyRuleNames = ImmutableHashSet.Create<string>(StringComparers.RuleNames);
 
         public static readonly ImmutableHashSet<string> EmptyVisualStudioSetupComponentIds = ImmutableHashSet.Create<string>(StringComparers.VisualStudioSetupComponentIds);

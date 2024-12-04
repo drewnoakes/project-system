@@ -187,6 +187,22 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.UpToDate
 
         private bool CheckInputsAndOutputs(Log log, DateTime? lastSuccessfulBuildStartTimeUtc, in TimestampCache timestampCache, UpToDateCheckImplicitConfiguredInput state, HashSet<string>? ignoreKinds, CancellationToken token)
         {
+            HashSet<string>? ignorePaths = state.IgnorePaths.IsEmpty
+                ? null
+                : new(state.IgnorePaths.Select(_configuredProject.UnconfiguredProject.MakeRooted), StringComparers.Paths);
+
+            if (log.Level >= LogLevel.Info && ignorePaths?.Count > 0)
+            {
+                log.Info(nameof(VSResources.FUTD_IgnoringFiles));
+
+                using Log.Scope _ = log.IndentScope();
+
+                foreach (string path in ignorePaths)
+                {
+                    log.InfoLiteral(path);
+                }
+            }
+
             // UpToDateCheckInput/Output/Built items have optional 'Set' metadata that determine whether they
             // are treated separately or not. If omitted, such inputs/outputs are included in the default set,
             // which also includes other items such as project files, compilation items, analyzer references, etc.
@@ -239,6 +255,12 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.UpToDate
 
                     token.ThrowIfCancellationRequested();
 
+                    if (ignorePaths?.Contains(output) == true)
+                    {
+                        log.Verbose(nameof(VSResources.FUTD_FileIgnored_1), output);
+                        continue;
+                    }
+
                     log.VerboseLiteral(output);
 
                     DateTime? outputTime = timestampCache.GetTimestampUtc(output);
@@ -273,6 +295,12 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.UpToDate
                     System.Diagnostics.Debug.Assert(Path.IsPathRooted(input), "Output path must be rooted", input);
 
                     token.ThrowIfCancellationRequested();
+
+                    if (ignorePaths?.Contains(input) == true)
+                    {
+                        log.Verbose(nameof(VSResources.FUTD_FileIgnored_1), input);
+                        continue;
+                    }
 
                     log.VerboseLiteral(input);
 

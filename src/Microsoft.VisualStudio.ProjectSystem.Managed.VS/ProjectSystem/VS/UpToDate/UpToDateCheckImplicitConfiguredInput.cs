@@ -27,6 +27,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.UpToDate
                 copyUpToDateMarkerItem: null,
                 outputRelativeOrFullPath: null,
                 newestImportInput: null,
+                ignorePaths: ImmutableStringHashSet.EmptyPaths,
                 isDisabled: true,
                 isBuildAccelerationEnabled: false,
                 inputSourceItemTypes: [],
@@ -159,6 +160,26 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.UpToDate
         /// </remarks>
         public ImmutableArray<string> KindNames { get; }
 
+        /// <summary>
+        /// Gets a set containing paths of files that the up-to-date check should ignore when comparing inputs and outputs.
+        /// </summary>
+        /// <remarks>
+        /// Typically expected to be empty. This is provided as an escape hatch for projects that need to ignore certain files.
+        ///
+        /// One use case is for projects that generate <c>Compile</c> items during the build, generated from other files.
+        /// It's enough, in that case, to track those other files as inputs, and outright ignore the generated compile item.
+        ///
+        /// If not ignored, the generated file will have a timestamp "after the last successful build's start time", which
+        /// marks the project as out-of-date, leading to a build.
+        ///
+        /// Files in this set must not be considered as inputs or outputs. They must also not contribute to <see cref="ItemHash"/>.
+        ///
+        /// Note that these files are modelled as a separate collection, as opposed to just removing them from the other
+        /// collections when reading project data. This is so that we can log the fact that files are ignored in the log output,
+        /// making it easier to understand when debugging underbuild problems.
+        /// </remarks>
+        public ImmutableHashSet<string> IgnorePaths { get; }
+
         public ImmutableDictionary<string, ImmutableDictionary<string, ImmutableArray<string>>> UpToDateCheckInputItemsByKindBySetName { get; }
 
         public ImmutableDictionary<string, ImmutableDictionary<string, ImmutableArray<string>>> UpToDateCheckOutputItemsByKindBySetName { get; }
@@ -236,6 +257,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.UpToDate
             InputSourceItemsByItemType = ImmutableDictionary.Create<string, ImmutableArray<string>>(StringComparers.ItemTypes);
             SetNames = [];
             KindNames = [];
+            IgnorePaths = ImmutableStringHashSet.EmptyPaths;
             UpToDateCheckInputItemsByKindBySetName = emptyItemBySetName;
             UpToDateCheckOutputItemsByKindBySetName = emptyItemBySetName;
             UpToDateCheckBuiltItemsByKindBySetName = emptyItemBySetName;
@@ -257,6 +279,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.UpToDate
             string? newestImportInput,
             bool isDisabled,
             bool? isBuildAccelerationEnabled,
+            ImmutableHashSet<string> ignorePaths,
             ImmutableArray<string> inputSourceItemTypes,
             ImmutableDictionary<string, ImmutableArray<string>> inputSourceItemsByItemType,
             ImmutableDictionary<string, ImmutableDictionary<string, ImmutableArray<string>>> upToDateCheckInputItemsByKindBySetName,
@@ -282,6 +305,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.UpToDate
             IsBuildAccelerationEnabled = isBuildAccelerationEnabled;
             InputSourceItemTypes = inputSourceItemTypes;
             InputSourceItemsByItemType = inputSourceItemsByItemType;
+            IgnorePaths = ignorePaths;
             UpToDateCheckInputItemsByKindBySetName = upToDateCheckInputItemsByKindBySetName;
             UpToDateCheckOutputItemsByKindBySetName = upToDateCheckOutputItemsByKindBySetName;
             UpToDateCheckBuiltItemsByKindBySetName = upToDateCheckBuiltItemsByKindBySetName;
@@ -474,6 +498,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.UpToDate
                 newestImportInput,
                 isDisabled: isDisabled,
                 isBuildAccelerationEnabled: isBuildAccelerationEnabled,
+                ignorePaths: UpdateIgnorePaths(),
                 inputSourceItemTypes: inputSourceItemTypes.ToImmutableArray(),
                 inputSourceItemsByItemType: inputSourceItemsByItemType,
                 upToDateCheckInputItemsByKindBySetName:  UpdateItemsByKindBySetName(UpToDateCheckInputItemsByKindBySetName,  jointRuleUpdate, UpToDateCheckInput.SchemaName,  UpToDateCheckInput.KindProperty,  UpToDateCheckInput.SetProperty),
@@ -559,6 +584,23 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.UpToDate
 
                     items.Add(item);
                 }
+            }
+
+            ImmutableHashSet<string> UpdateIgnorePaths()
+            {
+                if (jointRuleUpdate.ProjectChanges.TryGetValue(UpToDateCheckIgnore.SchemaName, out IProjectChangeDescription? change) && change.Difference.AnyChanges)
+                {
+                    var ignorePathsBuilder = ImmutableStringHashSet.EmptyPaths.ToBuilder();
+
+                    foreach ((string path, _) in change.After.Items)
+                    {
+                        ignorePathsBuilder.Add(path);
+                    }
+
+                    return ignorePathsBuilder.ToImmutableHashSet();
+                }
+
+                return IgnorePaths;
             }
 
             ImmutableArray<(string DestinationRelative, string SourceRelative)> UpdateBuildFromInputFileItems()
@@ -754,6 +796,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.UpToDate
                 NewestImportInput,
                 IsDisabled,
                 IsBuildAccelerationEnabled,
+                IgnorePaths,
                 InputSourceItemTypes,
                 InputSourceItemsByItemType,
                 UpToDateCheckInputItemsByKindBySetName,
@@ -781,6 +824,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.UpToDate
                 NewestImportInput,
                 IsDisabled,
                 IsBuildAccelerationEnabled,
+                IgnorePaths,
                 InputSourceItemTypes,
                 InputSourceItemsByItemType,
                 UpToDateCheckInputItemsByKindBySetName,

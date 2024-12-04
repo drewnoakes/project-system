@@ -191,6 +191,18 @@
     <Compile Update="ProjectSystem\VS\Rules\UpToDateCheckOutput.cs">
       <DependentUpon>UpToDateCheckOutput.xaml</DependentUpon>
     </Compile>
+
+    <XamlPropertyRule Include="ProjectSystem\VS\Rules\UpToDateCheckIgnore.xaml">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+      <XlfInput>false</XlfInput>
+      <DataAccess>None</DataAccess>
+      <Generator>MSBuild:GenerateRuleSourceFromXaml</Generator>
+      <RuleInjection>None</RuleInjection>
+    </XamlPropertyRule>
+    <Compile Update="ProjectSystem\VS\Rules\UpToDateCheckIgnore.cs">
+      <DependentUpon>UpToDateCheckIgnore.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <!-- This is required for SourceLink to find these .xaml files within the generated .g.cs files. -->

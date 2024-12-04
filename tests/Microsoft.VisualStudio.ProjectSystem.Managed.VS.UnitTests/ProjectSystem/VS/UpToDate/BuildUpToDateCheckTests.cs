@@ -1101,6 +1101,49 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.UpToDate
         }
 
         [Fact]
+        public async Task IsUpToDateAsync_True_IgnoredFileChanged()
+        {
+            var projectSnapshot = new Dictionary<string, IProjectRuleSnapshotModel>
+            {
+                [UpToDateCheckBuilt.SchemaName] = SimpleItems(@"bin\Debug\Built.dll"),
+                [UpToDateCheckInput.SchemaName] = SimpleItems("Input.cs", "Input.g.cs"),
+                [UpToDateCheckIgnore.SchemaName] = SimpleItems("Input.g.cs") // Ignore the generated file
+            };
+
+            var itemChangeTime = DateTime.UtcNow.AddMinutes(-5);
+            var inputTime = DateTime.UtcNow.AddMinutes(-4);
+            var lastBuildTime = DateTime.UtcNow.AddMinutes(-3); // last build starts
+            var generatedTime = DateTime.UtcNow.AddMinutes(-2); // file was generated (during build)
+            var outputTime = DateTime.UtcNow.AddMinutes(-1); // output was updated
+
+            await SetupAsync(
+                projectSnapshot,
+                lastSuccessfulBuildStartTimeUtc: lastBuildTime,
+                lastItemsChangedAtUtc: itemChangeTime);
+
+            _fileSystem.AddFile(_builtPath, outputTime);
+            _fileSystem.AddFile(@"C:\Dev\Solution\Project\Input.cs", inputTime);
+            _fileSystem.AddFile(@"C:\Dev\Solution\Project\Input.g.cs", generatedTime);
+
+            await AssertUpToDateAsync(
+                $"""
+                Build acceleration is not enabled for this project. See https://aka.ms/vs-build-acceleration.
+                Ignoring items:
+                    C:\Dev\Solution\Project\Input.g.cs
+                Comparing timestamps of inputs and outputs:
+                    Adding UpToDateCheckBuilt outputs:
+                        {_builtPath}
+                    Adding newest import input:
+                        {_projectPath}
+                    Adding UpToDateCheckInput inputs:
+                        C:\Dev\Solution\Project\Input.cs
+                        C:\Dev\Solution\Project\Input.g.cs [ignored]
+                    No inputs are newer than earliest output '{_builtPath}' ({ToLocalTime(outputTime)}). Newest input is '{_inputPath}' ({ToLocalTime(inputTime)}).
+                Project is up-to-date.
+                """);
+        }
+
+        [Fact]
         public async Task IsUpToDateAsync_False_Sets_InputNewerThanOutput()
         {
             var projectSnapshot = new Dictionary<string, IProjectRuleSnapshotModel>

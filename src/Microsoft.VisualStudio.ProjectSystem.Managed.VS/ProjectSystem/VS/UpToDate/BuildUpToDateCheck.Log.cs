@@ -161,6 +161,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.UpToDate
             public void Info(string resourceName, object arg0) => Write(LogLevel.Info, resourceName, arg0);
             public void Info(string resourceName, object arg0, object arg1) => Write(LogLevel.Info, resourceName, arg0, arg1);
             public void Info(string resourceName, params object[] values) => Write(LogLevel.Info, resourceName, values);
+            public void InfoLiteral(string message) => WriteLiteral(LogLevel.Info, message);
 
             public void Verbose(string resourceName) => Write(LogLevel.Verbose, resourceName);
             public void Verbose(string resourceName, object arg0) => Write(LogLevel.Verbose, resourceName, arg0);

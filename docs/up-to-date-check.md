@@ -88,6 +88,21 @@ For the targets above, you can update the `DependsOn` attribute by setting these
 - `CollectUpToDateCheckOutputDesignTimeDependsOn`
 - `CollectUpToDateCheckBuiltDesignTimeDependsOn`
 
+### Ignoring specific inputs and outputs
+
+If you have an input or output that should not be considered by the up-to-date check, you can add `UpToDateCheckIgnore` items to the project.
+Any such items will be ignored when comparing inputs and outputs.
+
+For example, you might want to ignore a `Compile` item that's generated during the build, to prevent that file from being flagged as having changed since the last successful build started:
+
+```xml
+<ItemGroup>
+  <UpToDateCheckIgnore Include="MyFile.generated.cs" />
+</ItemGroup>
+```
+
+Details of ignored files are captured in the log output, making debugging easier.
+
 ### Grouping inputs and outputs into sets
 
 For some advanced scenarios, it's necessary to partition inputs and outputs into groups and consider each separately.

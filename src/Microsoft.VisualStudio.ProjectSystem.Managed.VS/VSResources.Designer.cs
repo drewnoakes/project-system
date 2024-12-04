@@ -601,6 +601,15 @@ namespace Microsoft.VisualStudio {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} [ignored].
+        /// </summary>
+        internal static string FUTD_FileIgnored_1 {
+            get {
+                return ResourceManager.GetString("FUTD_FileIgnored_1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The up-to-date check has not yet run for this project. Not up-to-date..
         /// </summary>
         internal static string FUTD_FirstRun {
@@ -615,6 +624,15 @@ namespace Microsoft.VisualStudio {
         internal static string FUTD_FromTo_2 {
             get {
                 return ResourceManager.GetString("FUTD_FromTo_2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ignoring items:.
+        /// </summary>
+        internal static string FUTD_IgnoringFiles {
+            get {
+                return ResourceManager.GetString("FUTD_IgnoringFiles", resourceCulture);
             }
         }
         

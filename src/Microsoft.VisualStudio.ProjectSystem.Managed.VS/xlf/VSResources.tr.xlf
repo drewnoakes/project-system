@@ -35,6 +35,16 @@
         <target state="translated">Yinelenen dosyaları {0} çıkış dizinine kopyaladığından derleme hızlandırma özelliği bu proje için kullanılamıyor</target>
         <note>{0} is a list of one or more relative file paths.</note>
       </trans-unit>
+      <trans-unit id="FUTD_FileIgnored_1">
+        <source>{0} [ignored]</source>
+        <target state="new">{0} [ignored]</target>
+        <note>{0} is an absolute file path to a file that's being ignored. The "[ignored]" suffix appears on any ignored items in logged file paths.</note>
+      </trans-unit>
+      <trans-unit id="FUTD_IgnoringFiles">
+        <source>Ignoring items:</source>
+        <target state="new">Ignoring items:</target>
+        <note>Header for an indented list of file names that will be ignored.</note>
+      </trans-unit>
       <trans-unit id="FrameworkAssemblyAssemblyNameDescription">
         <source>The name of the framework assembly.</source>
         <target state="translated">Çerçeve bütünleştirilmiş kodunun adı.</target>
