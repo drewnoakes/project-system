@@ -4,11 +4,6 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS;
 
 internal static class IEnvironmentOptionsFactory
 {
-    public static IEnvironmentOptions Create()
-    {
-        return Mock.Of<IEnvironmentOptions>();
-    }
-
     public static IEnvironmentOptions Implement<T>(Func<string, string, string, T, T> environmentOptionsValue)
     {
         var mock = new Mock<IEnvironmentOptions>();

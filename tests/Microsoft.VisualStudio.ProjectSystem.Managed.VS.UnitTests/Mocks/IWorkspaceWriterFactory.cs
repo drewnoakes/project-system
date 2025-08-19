@@ -12,13 +12,6 @@ internal static class IWorkspaceWriterFactory
         return Mock.Of<IWorkspaceWriter>();
     }
 
-    public static IWorkspaceWriter ImplementContextId(string contextId)
-    {
-        var workspace = IWorkspaceMockFactory.ImplementContextId(contextId);
-
-        return new WorkspaceWriter(workspace);
-    }
-
     public static IWorkspaceWriter ImplementErrorReporter(Func<IVsLanguageServiceBuildErrorReporter2> func)
     {
         var workspace = IWorkspaceMockFactory.ImplementErrorReporter(func);

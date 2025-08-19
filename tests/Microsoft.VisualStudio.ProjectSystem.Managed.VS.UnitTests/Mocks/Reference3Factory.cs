@@ -6,15 +6,6 @@ namespace VSLangProj80;
 
 internal static class Reference3Factory
 {
-    public static Reference3 CreateComReference()
-    {
-        var mock = new Mock<Reference3>();
-        mock.SetupGet(r => r.Type)
-            .Returns(prjReferenceType.prjReferenceTypeActiveX);
-
-        return mock.Object;
-    }
-
     public static Reference3 CreateAssemblyReference(
         string name,
         string? version = null,

@@ -4,15 +4,6 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS;
 
 internal static class IVsUIServiceFactory
 {
-    public static IVsUIService<T> Create<T>(T value) where T : class
-    {
-        var mock = new Mock<IVsUIService<T>>();
-        mock.SetupGet(s => s.Value)
-            .Returns(() => value);
-
-        return mock.Object;
-    }
-
     public static IVsUIService<TService, TInterface> Create<TService, TInterface>(TInterface value) where TService : class
         where TInterface : class?
     {

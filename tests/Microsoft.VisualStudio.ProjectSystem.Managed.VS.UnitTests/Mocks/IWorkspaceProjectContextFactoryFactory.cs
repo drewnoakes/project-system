@@ -15,15 +15,6 @@ internal static class IWorkspaceProjectContextFactoryFactory
         return mock.Object;
     }
 
-    public static IWorkspaceProjectContextFactory ImplementCreateProjectContextThrows(Exception exception)
-    {
-        var mock = new Mock<IWorkspaceProjectContextFactory>(MockBehavior.Strict);
-
-        mock.SetupCreateProjectContext().Throws(exception);
-
-        return mock.Object;
-    }
-
     public static ISetup<IWorkspaceProjectContextFactory, Task<IWorkspaceProjectContext>> SetupCreateProjectContext(this Mock<IWorkspaceProjectContextFactory> mock)
     {
         return mock.Setup(c => c.CreateProjectContextAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<EvaluationData>(), It.IsAny<object?>(), It.IsAny<CancellationToken>()));
