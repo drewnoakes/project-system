@@ -6,6 +6,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Setup;
 
 [Export(typeof(UnconfiguredSetupComponentDataSource))]
 [method: ImportingConstructor]
+[ProjectSystemContract(ProjectSystemContractScope.UnconfiguredProject, ProjectSystemContractProvider.Private)]
 internal sealed class UnconfiguredSetupComponentDataSource(UnconfiguredProject unconfiguredProject, IActiveConfigurationGroupService activeConfigurationGroupService)
     : ChainedProjectValueDataSourceBase<UnconfiguredSetupComponentSnapshot>(projectService: unconfiguredProject.ProjectService, synchronousDisposal: false, registerDataSource: false)
 {
@@ -48,6 +49,7 @@ internal sealed class UnconfiguredSetupComponentDataSource(UnconfiguredProject u
 
     [Export(typeof(ConfiguredSetupComponentDataSource))]
     [method: ImportingConstructor]
+    [ProjectSystemContract(ProjectSystemContractScope.ConfiguredProject, ProjectSystemContractProvider.Private)]
     private sealed class ConfiguredSetupComponentDataSource(ConfiguredProject configuredProject, IProjectSubscriptionService projectSubscriptionService)
         : ChainedProjectValueDataSourceBase<ConfiguredSetupComponentSnapshot>(projectService: configuredProject.UnconfiguredProject.ProjectService, synchronousDisposal: false, registerDataSource: false)
     {

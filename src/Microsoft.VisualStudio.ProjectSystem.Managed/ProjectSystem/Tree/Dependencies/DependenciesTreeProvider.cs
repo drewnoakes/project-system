@@ -505,5 +505,6 @@ internal sealed partial class DependenciesTreeProvider : ProjectTreeProviderBase
     }
 
     // NOTE this interface is needed to work around accessiblity issues when making MyConfiguredProjectExports non-private
+    [ProjectSystemContract(ProjectSystemContractScope.ConfiguredProject, ProjectSystemContractProvider.System)]
     internal interface IConfiguredProjectExports { }
 }

@@ -7,6 +7,7 @@ namespace Microsoft.VisualStudio.ProjectSystem;
 [Export]
 [Export(typeof(IUnconfiguredProjectTasksService))]
 [AppliesTo(ProjectCapability.DotNet)]
+[ProjectSystemContract(ProjectSystemContractScope.UnconfiguredProject, ProjectSystemContractProvider.Host)]
 internal class UnconfiguredProjectTasksService : IUnconfiguredProjectTasksService
 {
     private readonly IProjectAsynchronousTasksService _tasksService;

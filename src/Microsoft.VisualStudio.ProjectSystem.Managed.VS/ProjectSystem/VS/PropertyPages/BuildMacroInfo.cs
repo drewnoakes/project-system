@@ -9,6 +9,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.PropertyPages;
 /// </summary>
 [ExportProjectNodeComService(typeof(IVsBuildMacroInfo))]
 [AppliesTo(ProjectCapability.DotNet)]
+[ProjectSystemContract(ProjectSystemContractScope.UnconfiguredProject, ProjectSystemContractProvider.Private)]
 internal class BuildMacroInfo : IVsBuildMacroInfo, IDisposable
 {
     private IProjectThreadingService? _threadingService;

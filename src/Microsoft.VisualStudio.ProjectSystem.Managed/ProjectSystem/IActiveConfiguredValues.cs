@@ -6,6 +6,7 @@ namespace Microsoft.VisualStudio.ProjectSystem;
 ///     Provides an <see cref="UnconfiguredProject"/> access to exports from the active
 ///     <see cref="ConfiguredProject"/>. This is the plural version of <see cref="IActiveConfiguredValue{T}"/>.
 /// </summary>
+[ProjectSystemContract(ProjectSystemContractScope.UnconfiguredProject, ProjectSystemContractProvider.Private, Cardinality = ImportCardinality.ExactlyOne)]
 internal interface IActiveConfiguredValues<T>
     where T : class
 {

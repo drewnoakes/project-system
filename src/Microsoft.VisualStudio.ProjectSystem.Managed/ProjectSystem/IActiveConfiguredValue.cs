@@ -18,6 +18,7 @@ namespace Microsoft.VisualStudio.ProjectSystem;
 ///         satisfied by an export that will be applied to a particular capability.
 ///     </para>
 /// </remarks>
+[ProjectSystemContract(ProjectSystemContractScope.UnconfiguredProject, ProjectSystemContractProvider.Private, Cardinality = ImportCardinality.ExactlyOne)]
 internal interface IActiveConfiguredValue<T>
     where T : class?
 {

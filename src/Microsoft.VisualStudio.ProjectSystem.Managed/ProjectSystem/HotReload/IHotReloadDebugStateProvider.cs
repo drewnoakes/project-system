@@ -2,6 +2,7 @@
 
 namespace Microsoft.VisualStudio.ProjectSystem.HotReload;
 
+[ProjectSystemContract(ProjectSystemContractScope.ProjectService, ProjectSystemContractProvider.Private)]
 internal interface IHotReloadDebugStateProvider
 {
     /// <summary>

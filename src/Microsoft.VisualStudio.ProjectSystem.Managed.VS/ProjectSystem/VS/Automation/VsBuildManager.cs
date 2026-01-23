@@ -13,6 +13,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Automation;
 [Export(typeof(VSBuildManager))]
 [AppliesTo(ProjectCapability.CSharpOrVisualBasic)]
 [Order(Order.Default)]
+[ProjectSystemContract(ProjectSystemContractScope.UnconfiguredProject, ProjectSystemContractProvider.Private)]
 internal class VSBuildManager : ConnectionPointContainer,
                                 IEventSource<_dispBuildManagerEvents>,
                                 BuildManager,

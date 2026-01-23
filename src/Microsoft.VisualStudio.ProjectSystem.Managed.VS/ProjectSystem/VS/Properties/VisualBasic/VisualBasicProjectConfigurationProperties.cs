@@ -7,6 +7,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Properties.VisualBasic;
 [Export(ExportContractNames.VsTypes.ConfiguredProjectPropertiesAutomationObject)]
 [Order(Order.Default)]
 [AppliesTo(ProjectCapability.VisualBasic)]
+[ProjectSystemContract(ProjectSystemContractScope.ConfiguredProject, ProjectSystemContractProvider.Host, ContractName = ExportContractNames.VsTypes.ConfiguredProjectPropertiesAutomationObject)]
 public class VisualBasicProjectConfigurationProperties : AbstractProjectConfigurationProperties,
     VBProjectConfigurationProperties6
 {

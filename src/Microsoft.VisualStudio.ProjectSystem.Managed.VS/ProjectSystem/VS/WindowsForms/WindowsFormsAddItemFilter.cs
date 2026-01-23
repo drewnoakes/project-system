@@ -9,6 +9,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.WindowsForms;
 /// </summary>
 [ExportProjectNodeComService(typeof(IVsFilterAddProjectItemDlg))]
 [AppliesTo(ProjectCapability.DotNet)]
+[ProjectSystemContract(ProjectSystemContractScope.UnconfiguredProject, ProjectSystemContractProvider.Private)]
 internal class WindowsFormsAddItemFilter : IVsFilterAddProjectItemDlg, IDisposable
 {
     private UnconfiguredProject? _project;

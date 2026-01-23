@@ -17,6 +17,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.References;
 [ExportVsProfferedProjectService(typeof(SVsDesignTimeAssemblyResolution))]
 [AppliesTo(ProjectCapability.DotNet)]
 [Order(Order.Default)] // Before CPS's version
+[ProjectSystemContract(ProjectSystemContractScope.UnconfiguredProject, ProjectSystemContractProvider.Private)]
 internal partial class DesignTimeAssemblyResolution : IVsDesignTimeAssemblyResolution, IDisposable
 {
     // NOTE: Unlike the legacy project system, this implementation does resolve only "framework" assemblies. In .NET Core and other project types, framework assemblies

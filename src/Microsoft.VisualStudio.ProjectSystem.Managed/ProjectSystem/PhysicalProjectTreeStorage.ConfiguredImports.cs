@@ -5,6 +5,7 @@ namespace Microsoft.VisualStudio.ProjectSystem;
 internal partial class PhysicalProjectTreeStorage
 {
     [Export]
+    [ProjectSystemContract(ProjectSystemContractScope.ConfiguredProject, ProjectSystemContractProvider.Private)]
     internal class ConfiguredImports
     {
         public readonly IFolderManager FolderManager;

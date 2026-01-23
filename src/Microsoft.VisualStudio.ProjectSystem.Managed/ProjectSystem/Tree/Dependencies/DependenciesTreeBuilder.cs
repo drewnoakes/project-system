@@ -14,6 +14,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.Tree.Dependencies;
 /// This class's primary entry point is <see cref="BuildTreeAsync"/>.
 /// </remarks>
 [Export]
+[ProjectSystemContract(ProjectSystemContractScope.UnconfiguredProject, ProjectSystemContractProvider.Private)]
 internal sealed class DependenciesTreeBuilder
 {
     private static ImmutableDictionary<ProjectConfigurationSlice, ProjectTreeFlags> s_flagsByConfigurationSlice = ImmutableDictionary<ProjectConfigurationSlice, ProjectTreeFlags>.Empty;

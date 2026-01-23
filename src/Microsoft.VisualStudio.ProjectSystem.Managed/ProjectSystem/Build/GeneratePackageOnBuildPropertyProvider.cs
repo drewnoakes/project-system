@@ -8,6 +8,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.Build;
 [ExportBuildGlobalPropertiesProvider(designTimeBuildProperties: false)]
 [Export(typeof(GeneratePackageOnBuildPropertyProvider))]
 [AppliesTo(ProjectCapability.Pack)]
+[ProjectSystemContract(ProjectSystemContractScope.ProjectService, ProjectSystemContractProvider.Private)]
 internal class GeneratePackageOnBuildPropertyProvider : StaticGlobalPropertiesProviderBase
 {
     private Task<IImmutableDictionary<string, string>> _properties = Task.FromResult<IImmutableDictionary<string, string>>(Empty.PropertiesMap);

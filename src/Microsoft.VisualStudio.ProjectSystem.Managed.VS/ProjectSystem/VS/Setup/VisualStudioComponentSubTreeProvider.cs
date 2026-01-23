@@ -127,6 +127,7 @@ internal sealed class VisualStudioComponentSubTreeProvider(
 
     [Export]
     [method: ImportingConstructor]
+    [ProjectSystemContract(ProjectSystemContractScope.ConfiguredProject, ProjectSystemContractProvider.Private)]
     private sealed class MyConfiguredProjectExports(ConfiguredProject configuredProject) : ConfiguredProjectExports(configuredProject)
     {
     }

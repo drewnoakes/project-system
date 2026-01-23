@@ -14,6 +14,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Query;
 /// which will pass on the version information only after being bound to an <see cref="ILaunchSettingsVersionPublisher"/>.
 /// </remarks>
 [Export]
+[ProjectSystemContract(ProjectSystemContractScope.Global, ProjectSystemContractProvider.Private)]
 internal sealed class LaunchSettingsQueryVersionProvider
 {
     private readonly object _lock = new();

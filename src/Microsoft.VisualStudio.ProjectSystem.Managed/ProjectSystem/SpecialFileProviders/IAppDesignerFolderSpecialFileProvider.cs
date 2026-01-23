@@ -2,6 +2,7 @@
 
 namespace Microsoft.VisualStudio.ProjectSystem.SpecialFileProviders;
 
+[ProjectSystemContract(ProjectSystemContractScope.ConfiguredProject, ProjectSystemContractProvider.Extension)]
 internal interface IAppDesignerFolderSpecialFileProvider : ISpecialFileProvider
 {
 }

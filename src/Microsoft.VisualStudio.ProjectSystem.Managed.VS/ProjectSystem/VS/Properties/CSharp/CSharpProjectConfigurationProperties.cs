@@ -8,6 +8,7 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Properties.CSharp;
 [Export(ExportContractNames.VsTypes.ConfiguredProjectPropertiesAutomationObject)]
 [Order(Order.Default)]
 [AppliesTo(ProjectCapability.CSharp)]
+[ProjectSystemContract(ProjectSystemContractScope.ConfiguredProject, ProjectSystemContractProvider.Host, ContractName = ExportContractNames.VsTypes.ConfiguredProjectPropertiesAutomationObject)]
 public class CSharpProjectConfigurationProperties : AbstractProjectConfigurationProperties,
     CSharpProjectConfigurationProperties3,
     CSharpProjectConfigurationProperties6
