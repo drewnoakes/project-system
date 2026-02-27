@@ -91,7 +91,7 @@ internal partial class PackageRestoreDataSource : ChainedProjectValueDataSourceB
 
         // Take the unconfigured "restore inputs", send them to NuGet, and then return the result of that restore.
         // We make use of TransformMany so that we can opt out of returning.
-        DisposableValue<ISourceBlock<IProjectVersionedValue<RestoreData>>> transformBlock = _dataSource.SourceBlock.TransformManyWithNoDelta(RestoreAsync);
+        DisposableValue<ISourceBlock<ProjectVersionedValue<RestoreData>>> transformBlock = _dataSource.SourceBlock.TransformManyWithNoDelta(RestoreAsync);
 
         transformBlock.Value.LinkTo(targetBlock, DataflowOption.PropagateCompletion);
 
@@ -99,7 +99,7 @@ internal partial class PackageRestoreDataSource : ChainedProjectValueDataSourceB
     }
 
     // internal for testing purposes only -- the only real caller is the transform block
-    internal async Task<IEnumerable<IProjectVersionedValue<RestoreData>>> RestoreAsync(IProjectVersionedValue<PackageRestoreUnconfiguredInput> e)
+    internal async Task<IEnumerable<ProjectVersionedValue<RestoreData>>> RestoreAsync(IProjectVersionedValue<PackageRestoreUnconfiguredInput> e)
     {
         // No configurations - likely during project close.
         // Check if out of date to prevent extra restore under some conditions.

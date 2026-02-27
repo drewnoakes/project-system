@@ -68,7 +68,7 @@
     <PackageReference Include="Microsoft.VisualStudio.Internal.MicroBuild.NpmPack" PrivateAssets="all" />
   </ItemGroup>
 
-  <Import Project="..\HotReloadRuntimeDependencies.props"/>
+  <Import Project="..\HotReloadRuntimeDependencies.props" />
   
   <!-- Dependencies -->
   <ItemGroup>

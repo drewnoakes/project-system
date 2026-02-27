@@ -3,6 +3,7 @@
 namespace Microsoft.VisualStudio.ProjectSystem.VS.Logging;
 
 #pragma warning disable RS0030 // Do not used banned APIs
+
 /// <summary>
 ///   An implementation of the <see cref="IManagedProjectDiagnosticOutputService"/> that
 ///   delegates to the CPS <see cref="IProjectDiagnosticOutputService"/>.
@@ -13,26 +14,12 @@ namespace Microsoft.VisualStudio.ProjectSystem.VS.Logging;
 ///   not for any technical reason.
 /// </remarks>
 [Export(typeof(IManagedProjectDiagnosticOutputService))]
-#pragma warning restore RS0030 // Do not used banned APIs
 [AppliesTo(ProjectCapability.DotNet)]
-internal class VsManagedProjectDiagnosticOutputService : IManagedProjectDiagnosticOutputService
+[method: ImportingConstructor]
+internal class VsManagedProjectDiagnosticOutputService(IProjectDiagnosticOutputService projectDiagnosticOutputService)
+    : IManagedProjectDiagnosticOutputService
 {
-    private readonly IProjectDiagnosticOutputService _projectDiagnosticOutputService;
+    public bool IsEnabled => projectDiagnosticOutputService.IsEnabled;
 
-    [ImportingConstructor]
-    public VsManagedProjectDiagnosticOutputService(IProjectDiagnosticOutputService projectDiagnosticOutputService)
-    {
-        _projectDiagnosticOutputService = projectDiagnosticOutputService;
-    }
-
-#pragma warning disable RS0030 // Do not used banned APIs
-    public bool IsEnabled => _projectDiagnosticOutputService.IsEnabled;
-#pragma warning restore RS0030 // Do not used banned APIs
-
-    public void WriteLine(string outputMessage)
-    {
-#pragma warning disable RS0030 // Do not used banned APIs
-        _projectDiagnosticOutputService.WriteLine(outputMessage);
-#pragma warning restore RS0030 // Do not used banned APIs
-    }
+    public void WriteLine(string outputMessage) => projectDiagnosticOutputService.WriteLine(outputMessage);
 }

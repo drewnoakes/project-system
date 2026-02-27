@@ -11,7 +11,9 @@ internal class PhysicalProjectTree : IPhysicalProjectTree
 
     [ImportingConstructor]
     public PhysicalProjectTree([Import(ExportContractNames.ProjectTreeProviders.PhysicalProjectTreeService)]Lazy<IProjectTreeService> treeService,
+#pragma warning disable CPS011 // ImportMany required for ZeroOrMore cardinality
                                [Import(ExportContractNames.ProjectTreeProviders.PhysicalViewTree)]Lazy<IProjectTreeProvider> treeProvider,
+#pragma warning restore CPS011 // ImportMany required for ZeroOrMore cardinality
                                Lazy<IPhysicalProjectTreeStorage> treeStorage)
     {
         _treeService = treeService;

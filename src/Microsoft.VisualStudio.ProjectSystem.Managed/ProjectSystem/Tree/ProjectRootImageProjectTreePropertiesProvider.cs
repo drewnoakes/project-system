@@ -17,7 +17,9 @@ internal class ProjectRootImageProjectTreePropertiesProvider : IProjectTreePrope
     private readonly IProjectImageProvider _imageProvider;
 
     [ImportingConstructor]
-    public ProjectRootImageProjectTreePropertiesProvider(IProjectCapabilitiesService capabilities, [Import(typeof(ProjectImageProviderAggregator))]IProjectImageProvider imageProvider)
+    public ProjectRootImageProjectTreePropertiesProvider(
+        IProjectCapabilitiesService capabilities,
+        [Import(typeof(ProjectImageProviderAggregator))] IProjectImageProvider imageProvider)
     {
         _capabilities = capabilities;
         _imageProvider = imageProvider;

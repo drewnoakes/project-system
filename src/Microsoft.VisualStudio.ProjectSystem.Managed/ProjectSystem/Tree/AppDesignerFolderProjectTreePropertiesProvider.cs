@@ -22,7 +22,7 @@ internal class AppDesignerFolderProjectTreePropertiesProvider : AbstractSpecialF
 
     [ImportingConstructor]
     public AppDesignerFolderProjectTreePropertiesProvider(
-        [Import(typeof(ProjectImageProviderAggregator))]IProjectImageProvider imageProvider,
+        [Import(typeof(ProjectImageProviderAggregator))] IProjectImageProvider imageProvider,
         [Import(AllowDefault = true)] IProjectDesignerService? designerService)
         : base(imageProvider)
     {
